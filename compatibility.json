@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "desktop": {
+    "version": "0.1.0",
+    "runtimeManifestSchema": 1,
+    "upgradeSnapshotSchema": 1
+  },
+  "dsh": {
+    "version": "0.1.0-rc.7",
+    "runtimeGraph": "rc7",
+    "profileSchema": 1,
+    "sessionSchema": 1
+  },
+  "workbench": {
+    "version": "0.1.0",
+    "sha256": "b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f",
+    "profileSchema": 1
+  },
+  "profile": {
+    "schemaVersion": 1,
+    "layout": "harness/profiles/web",
+    "requiredFiles": ["package.json", "pnpm-lock.yaml", "cordis.patch.yml"]
+  },
+  "session": {
+    "schemaVersion": 1,
+    "format": "jsonl",
+    "migration": "preserve"
+  }
+}

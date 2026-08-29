@@ -1,0 +1,14 @@
+node_modules/
+out/
+release/
+packaging/e07/runtime/
+packaging/e07/cache/
+packaging/e08/runtime/
+packaging/e08/cache/
+packaging/e08/runtime-supervisor/
+packaging/e08/supervisor-build/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example

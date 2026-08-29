@@ -1,0 +1,111 @@
+{
+  "name": "insuremo-dsh-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "InsureMO DSH Desktop shell and runtime controller.",
+  "type": "module",
+  "main": "out/main/index.js",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=24.9.0"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build && node scripts/copy-runtime-assets.mjs && node scripts/gen-icon.mjs",
+    "build:e07:resources": "node scripts/prepare-e07-resources.mjs",
+    "build:e08:supervisor": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-runtime-supervisor.ps1",
+    "build:e08:resources": "node scripts/prepare-e08-windows-resources.mjs",
+    "package:e08:win": "pnpm build && pnpm build:e08:supervisor && pnpm build:e08:resources && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win nsis --x64 --publish never",
+    "package:e08:win:signed": "pnpm build && pnpm build:e08:supervisor && pnpm build:e08:resources && electron-builder --win nsis --x64 --publish never",
+    "smoke:e08:win": "node scripts/run-e08-windows-smoke.mjs",
+    "scan:e08:artifacts": "node scripts/scan-e08-artifacts.mjs",
+    "generate:e08:sbom": "node scripts/generate-e07-sbom.mjs packaging/e08/runtime docs/evidence/e08-sbom.json",
+    "record:e09:receipt": "node scripts/record-e09-release-receipt.mjs",
+    "verify:e09:receipt": "node scripts/verify-e09-release-receipt.mjs",
+    "verify:e09:previous-installer": "node scripts/verify-e09-previous-installer.mjs",
+    "package:e07:arm64:dir": "pnpm build && DSH_RUNTIME_ARCH=arm64 pnpm build:e07:resources && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir --arm64 --publish never",
+    "package:e07:arm64:signed-dir": "pnpm build && DSH_RUNTIME_ARCH=arm64 pnpm build:e07:resources && electron-builder --dir --arm64 --publish never && node scripts/finalize-e07-signature.mjs \"release/mac-arm64/InsureMO DSH Desktop.app\"",
+    "package:e07:arm64:mac": "pnpm build && DSH_RUNTIME_ARCH=arm64 pnpm build:e07:resources && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip dmg --arm64 --publish never",
+    "package:e07:x64:dir": "pnpm build && DSH_RUNTIME_ARCH=x64 pnpm build:e07:resources && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir --x64 --publish never",
+    "smoke:e07:packaged": "node scripts/run-e07-packaged-smoke.mjs",
+    "scan:e07:artifacts": "node scripts/scan-e07-artifacts.mjs",
+    "record:e07:artifacts": "node scripts/record-e07-artifacts.mjs",
+    "generate:e07:sbom": "node scripts/generate-e07-sbom.mjs",
+    "preview": "electron-vite preview",
+    "start": "electron .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check:lines": "node scripts/check-lines.mjs",
+    "check:e00": "node scripts/verify-e00.mjs",
+    "audit:runtime-pins": "node scripts/audit-runtime-pins.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm check:lines && pnpm check:e00"
+  },
+  "dependencies": {
+    "react": "18.3.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh": "0.1.0-rc.7",
+    "@types/node": "22.15.21",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.3.4",
+    "electron": "43.4.0",
+    "electron-builder": "26.0.12",
+    "electron-vite": "3.1.0",
+    "react-dom": "18.3.1",
+    "typescript": "5.8.3",
+    "vite": "6.4.3",
+    "vitest": "3.1.2",
+    "yaml": "2.9.0"
+  },
+  "build": {
+    "appId": "com.insuremo.dsh.desktop",
+    "productName": "InsureMO DSH Desktop",
+    "asar": false,
+    "files": [
+      "out/**/*",
+      "config/runtime-pins.json",
+      "compatibility.json",
+      "build/icon.png",
+      "build/icon.ico",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "icon": "build/icon.png",
+    "mac": {
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "extraResources": [
+        {
+          "from": "packaging/e07/runtime",
+          "to": "dsh-runtime"
+        }
+      ],
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true,
+      "signExts": [".exe", ".dll", ".node"],
+      "requestedExecutionLevel": "asInvoker",
+      "verifyUpdateCodeSignature": true,
+      "extraResources": [
+        {
+          "from": "packaging/e08/runtime",
+          "to": "dsh-runtime"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "roots": [
+    "release/mac-arm64-signed",
+    "release/mac-arm64",
+    "release/mac"
+  ],
+  "counts": {
+    "sourceMaps": 0,
+    "testPaths": 0,
+    "absoluteDevPaths": 0,
+    "tokenLike": 0
+  },
+  "findings": {
+    "sourceMaps": [],
+    "testPaths": [],
+    "absoluteDevPaths": [],
+    "tokenLike": [],
+    "roots": [
+      "release/mac-arm64-signed",
+      "release/mac-arm64",
+      "release/mac"
+    ]
+  },
+  "sha256": "47df91ebee5b8a7e335dfe1d559f9e5f5de780a8fb62bfa12f425e5c5ecdc781"
+}

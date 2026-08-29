@@ -1,0 +1,38 @@
+:root {
+  color: #14213d;
+  background: #f7f9fc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+.pm { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+.pm-header h1 { margin: 0; font-size: 26px; }
+.pm-sub { color: #53627c; margin: 6px 0 20px; }
+
+.pm-install, .pm-list { background: #fff; border: 1px solid #e3e8f0; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+.pm-install h2, .pm-list h2 { margin: 0 0 12px; font-size: 15px; color: #33415c; }
+
+.pm-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.pm-input { flex: 1; min-width: 240px; padding: 8px 10px; border: 1px solid #ccd4e0; border-radius: 6px; font: inherit; }
+
+button { padding: 8px 14px; border: 1px solid #137c8b; background: #137c8b; color: #fff; border-radius: 6px; font: inherit; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: default; }
+button[type="button"] { background: #fff; color: #137c8b; }
+button[type="button"]:hover:not(:disabled) { background: #eaf6f7; }
+
+.pm-status { padding: 10px 12px; border-radius: 6px; font-size: 13px; margin: 0 0 12px; }
+.pm-status-ok { background: #e8f6ee; color: #1c7a3d; }
+.pm-status-error { background: #fdeeee; color: #b3261e; }
+.pm-status-working { background: #eef4fb; color: #1d5f9e; }
+
+.pm-items { list-style: none; margin: 0; padding: 0; }
+.pm-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eef1f6; }
+.pm-item:last-child { border-bottom: 0; }
+.pm-item-info { display: flex; gap: 8px; align-items: center; }
+.pm-item-name { font-weight: 600; }
+.pm-item-version { color: #78859b; font-size: 12px; }
+.pm-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.pm-badge-system { background: #f0e8fd; color: #6a3fb5; }
+.pm-badge-bundle { background: #e3f2fd; color: #1565c0; }
+.pm-empty { color: #78859b; font-size: 13px; }

@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "0.1.0",
+  "recordedAt": "2026-08-29T22:39:05.512Z",
+  "platform": "darwin",
+  "arch": "arm64",
+  "developmentOnly": true,
+  "compatibility": {
+    "schemaVersion": 1,
+    "desktop": {
+      "version": "0.1.0",
+      "runtimeManifestSchema": 1,
+      "upgradeSnapshotSchema": 1
+    },
+    "dsh": {
+      "version": "0.1.0-rc.7",
+      "runtimeGraph": "rc7",
+      "profileSchema": 1,
+      "sessionSchema": 1
+    },
+    "workbench": {
+      "version": "0.1.0",
+      "sha256": "b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f",
+      "profileSchema": 1
+    },
+    "profile": {
+      "schemaVersion": 1,
+      "layout": "harness/profiles/web",
+      "requiredFiles": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "cordis.patch.yml"
+      ]
+    },
+    "session": {
+      "schemaVersion": 1,
+      "format": "jsonl",
+      "migration": "preserve"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "release/InsureMO DSH Desktop-0.1.0-arm64-mac.zip",
+      "kind": "file",
+      "size": 257389420,
+      "sha256": "654be8137c0063c19eb3842a94cdd15e589c8e6b9b0dd1210d903938d3338a97",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-29T22:39:05.512Z"
+      }
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-0.1.0-arm64-mac.zip.blockmap",
+      "kind": "file",
+      "size": 265887,
+      "sha256": "386a5d50b78e188774dfd02e5ab8728b7fd10d16b3e2f74c7293082ca07c7513",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-29T22:39:05.512Z"
+      }
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-0.1.0-arm64.dmg",
+      "kind": "file",
+      "size": 252708362,
+      "sha256": "c811fa0e268d6452861dfde233db12dad64f9901da584d24944316b3d4aa01b1",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-29T22:39:05.512Z"
+      }
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-0.1.0-arm64.dmg.blockmap",
+      "kind": "file",
+      "size": 264011,
+      "sha256": "b872c36ff6af9cae27137abed68ee89ff8835210592145158cc04410f1a128a2",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-29T22:39:05.512Z"
+      }
+    },
+    {
+      "path": "release/mac-arm64-signed/InsureMO DSH Desktop.app",
+      "kind": "directory",
+      "size": 738417750,
+      "sha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18",
+      "manifestSha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18",
+      "manifestEntries": 27781,
+      "signature": {
+        "verified": true,
+        "method": "codesign-deep-strict",
+        "subject": "Apple Development: jophyzhang@126.com (W3P3ZMGWNW)",
+        "team": "ZG29WGT668",
+        "runtime": "26.4.0",
+        "notarized": false,
+        "verifiedAt": "2026-08-29T22:39:05.512Z"
+      }
+    }
+  ],
+  "evidence": {
+    "executedCommands": [
+      {
+        "command": "pnpm check",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "6552223b93659279b99845a67f2dc3857e0bc30551e3dbb79340dd13bfe18dde"
+      },
+      {
+        "command": "pnpm audit:runtime-pins -- --network",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "4749f2e161b62515225b09ce9a3778453d40e94e1d939c6dc24027dddc5c6ae5"
+      },
+      {
+        "command": "pnpm build",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "702e948d947e109310cb2bf19c157b5bb8142b88c87e02ae87a7594c9b797893"
+      },
+      {
+        "command": "DSH_RUNTIME_ARCH=arm64 DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm build:e07:resources",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "963edaeba5b020542c911c69fdaccc56c61ceeb2cf86857cbc7a7b453b843fb7"
+      },
+      {
+        "command": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir --arm64 --publish never",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "f828aceb8c788c37b9acfd139439f05e2145a87041df1b67d2faefda6ad92242"
+      },
+      {
+        "command": "pnpm exec electron-builder --dir --arm64 --publish never (Apple Development signed dir)",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "9dc40abe6696c2ec79f1e590827ccb4efad27b270bc65462c6b5014c8a5a4880"
+      },
+      {
+        "command": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir --x64 --publish never",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "8cf49bbedc6bb79a114577a76fd27ecfe564655cc88a1dc4f7d2cd1004fa483d"
+      },
+      {
+        "command": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip dmg --arm64 --publish never",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "63e357949dc84163eedca10b46a04be461f4b0477951ff8882dd6cc4bd697229"
+      },
+      {
+        "command": "node scripts/run-e07-packaged-smoke.mjs",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "b937fc910c57f092a22cf80b3115de794be7363695c5e82d71872be7d7e56b65"
+      },
+      {
+        "command": "codesign --verify --deep --strict release/mac-arm64-signed/InsureMO DSH Desktop.app",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "3f7ec587bccc130a6521632a68fa0dd1fe98f14f91ad67f5316ecc694582e0b7"
+      },
+      {
+        "command": "node scripts/generate-e07-sbom.mjs",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "e04cc8652df9915e62877d725248800001a994147e6998456011eaa653e63cda"
+      },
+      {
+        "command": "node scripts/record-e07-artifacts.mjs",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "56d7c7fa073120751b5a0dfe2c6adda20e1dc09fc25df6c1b7d065e323e6cac8"
+      },
+      {
+        "command": "node scripts/scan-e07-artifacts.mjs",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "88d259e1322111dc9e3387c61e73385918aed6a7b9764b05f44cb2e676ad3f24"
+      },
+      {
+        "command": "node scripts/record-e09-release-receipt.mjs",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "6bdc7195ffd3fccb9f506b556921ef00481f20e46d1d3fe7e7737fd52af0ec45"
+      }
+    ],
+    "requiredWindowsCommands": [
+      "pnpm build:e08:supervisor",
+      "pnpm build:e08:resources",
+      "electron-builder --win nsis --x64 --publish never",
+      "pnpm scan:e08:artifacts",
+      "pnpm generate:e08:sbom",
+      "pnpm smoke:e08:win"
+    ],
+    "resourceManifest": {
+      "entries": 27781,
+      "manifestSha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18",
+      "verified": true
+    },
+    "sbom": {
+      "components": 534,
+      "nativeFiles": 28,
+      "unknownLicenses": 0,
+      "sha256": "fd2e065ddb8446281d7ff5343bac36ef57fe3debec426be0d6bdfe8167445089"
+    },
+    "scan": {
+      "sourceMaps": 0,
+      "testPaths": 0,
+      "absoluteDevPaths": 0,
+      "tokenLike": 0,
+      "sha256": "47df91ebee5b8a7e335dfe1d559f9e5f5de780a8fb62bfa12f425e5c5ecdc781",
+      "source": "e07-scan.json"
+    },
+    "packagedSmoke": {
+      "ok": true,
+      "platform": "darwin",
+      "path": "<temp>/e07-packaged-smoke-result.json"
+    },
+    "orphanProcesses": 0
+  },
+  "previousInstallerPolicy": "signed-only-manual-reinstall",
+  "residualRisks": [
+    "Development receipt: Developer ID/Authenticode distribution signing and notarization must be supplied before release.",
+    "Native Windows x64 smoke requires windows-latest or an equivalent Windows runner."
+  ]
+}

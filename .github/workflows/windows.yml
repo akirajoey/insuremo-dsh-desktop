@@ -1,0 +1,85 @@
+name: windows
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/windows.yml'
+      - 'src/**'
+      - 'scripts/**'
+      - 'native/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'compatibility.json'
+  pull_request:
+    paths:
+      - '.github/workflows/windows.yml'
+      - 'src/**'
+      - 'scripts/**'
+      - 'native/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'compatibility.json'
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    env:
+      DSH_WORKBENCH_TGZ: ${{ secrets.DSH_WORKBENCH_TGZ }}
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.9.0
+          cache: pnpm
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Contract and unit checks
+        run: pnpm check
+      - name: Build Windows supervisor with MSVC
+        shell: pwsh
+        run: pnpm build:e08:supervisor
+      - name: Require verified Workbench input
+        shell: pwsh
+        run: |
+          if (-not $env:DSH_WORKBENCH_TGZ -or -not (Test-Path -LiteralPath $env:DSH_WORKBENCH_TGZ)) { throw 'DSH_WORKBENCH_TGZ secret must point to the verified Workbench tgz' }
+      - name: Prepare Windows runtime resources
+        run: pnpm build:e08:resources
+      - name: Build unsigned NSIS development package
+        run: pnpm exec electron-builder --win nsis --x64 --publish never
+      - name: Scan Windows artifacts
+        run: pnpm scan:e08:artifacts
+      - name: Generate Windows SBOM
+        run: pnpm generate:e08:sbom
+      - name: Packaged Windows smoke
+        env:
+          DSH_TEST_PLUGIN_TGZ: ${{ secrets.DSH_TEST_PLUGIN_TGZ }}
+        run: pnpm smoke:e08:win
+      - name: Windows release receipt
+        env:
+          DSH_E09_EXECUTED_COMMANDS: |
+            pnpm build:e08:supervisor
+            pnpm build:e08:resources
+            electron-builder --win nsis --x64 --publish never
+            pnpm scan:e08:artifacts
+            pnpm generate:e08:sbom
+            pnpm smoke:e08:win
+        run: |
+          pnpm record:e09:receipt
+          pnpm verify:e09:receipt
+      - name: Upload Windows evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-e08-evidence
+          path: |
+            release/*.exe
+            release/*.blockmap
+            docs/evidence/e08-scan.json
+            docs/evidence/e08-sbom.json
+            docs/evidence/e08-packaged-smoke-result.json
+            docs/evidence/e09-release-receipt.json
