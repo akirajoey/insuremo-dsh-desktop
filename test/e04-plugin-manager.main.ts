@@ -8,10 +8,9 @@ import { PnpmLauncher } from '../src/main/profile/pnpm-launcher.ts'
 import { BundleReconciler } from '../src/main/profile/bundle-reconciler.ts'
 import { PluginService } from '../src/main/plugins/plugin-service.ts'
 import { createPluginManagerWindow } from '../src/main/windows/plugin-manager-window.ts'
+import { WORKBENCH_TGZ, WORKBENCH_SHA256 as WB_SHA } from './support/workbench.ts'
 
 const TEST_TGZ = '/tmp/e04-test-plugin.tgz'
-const WORKBENCH_TGZ = '/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz'
-const WB_SHA = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
 const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
 const NODE = '/opt/homebrew/bin/node'
 const PROJECT_ROOT = fileURLToPath(new URL('..', import.meta.url))

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "releaseVersion": "0.1.0",
-  "recordedAt": "2026-08-30T03:50:00.198Z",
+  "recordedAt": "2026-08-30T04:10:33.877Z",
   "platform": "darwin",
   "arch": "arm64",
   "developmentOnly": true,
@@ -48,7 +48,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -60,7 +60,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -72,7 +72,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -84,7 +84,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -96,7 +96,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -108,7 +108,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -120,7 +120,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     },
     {
@@ -132,7 +132,7 @@
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-30T03:50:00.198Z"
+        "verifiedAt": "2026-08-30T04:10:33.877Z"
       }
     }
   ],
@@ -145,10 +145,10 @@
         "evidenceHash": "702e948d947e109310cb2bf19c157b5bb8142b88c87e02ae87a7594c9b797893"
       },
       {
-        "command": "DSH_RUNTIME_ARCH=arm64 DSH_WORKBENCH_TGZ=/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz pnpm build:e07:resources",
+        "command": "DSH_RUNTIME_ARCH=arm64 DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm build:e07:resources",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "1a2c9e05782e396e878d845ff6b29baac1eb6871918811a5c545105c91a8fc9a"
+        "evidenceHash": "963edaeba5b020542c911c69fdaccc56c61ceeb2cf86857cbc7a7b453b843fb7"
       },
       {
         "command": "DSH_DESKTOP_VARIANT=full CSC_IDENTITY_AUTO_DISCOVERY=false pnpm exec electron-builder --config scripts/electron-builder-config.mjs --mac zip dmg --arm64 --publish never",
@@ -225,6 +225,10 @@
       "pnpm generate:e08:sbom",
       "pnpm smoke:e08:win"
     ],
+    "workbenchArtifact": {
+      "spec": "<verified-workbench.tgz>",
+      "sha256": "b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f"
+    },
     "resourceManifest": {
       "entries": 27775,
       "manifestSha256": "6f27e3ad5dd82602d109bc402b5d9979903991adbc71213c2c0db28f0a7d13b9",

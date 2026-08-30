@@ -9,9 +9,8 @@ import { ProfileManager } from '../src/main/profile/profile-manager.ts'
 import { RuntimeController } from '../src/main/runtime/controller.ts'
 import { forkUtilityProcess } from '../src/main/runtime/utility-launcher.ts'
 import { parseHandshake } from '../src/main/runtime/launcher.ts'
+import { WORKBENCH_TGZ as TGZ, WORKBENCH_SHA256 as SHA } from './support/workbench.ts'
 
-const TGZ = '/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz'
-const SHA = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
 const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
 const WRAPPER = fileURLToPath(new URL('../src/main/runtime/wrapper.cjs', import.meta.url))
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e03-window-'))

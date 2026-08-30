@@ -87,7 +87,14 @@ const signedManifest = signedManifestPath === '' ? undefined : readJson(signedMa
 const manifestSha256 = runtime.resourceManifestSha256 ?? signedEvidence.manifestSha256 ?? (existsSync(signedManifestPath) ? digestFile(signedManifestPath) : '')
 const manifestEntries = runtime.resourceFileCount ?? signedManifest?.files?.length ?? 0
 const requestedCommands = (process.env.DSH_E09_EXECUTED_COMMANDS ?? '').split('\n').map(value => value.trim()).filter(Boolean)
-const executedCommands = requestedCommands.map(command => ({ command, platform: process.platform, ok: true, evidenceHash: createHash('sha256').update(command).digest('hex') }))
+// Host-absolute paths must never be recorded: the verified Workbench artifact
+// is proven by its SHA256 in evidence.workbenchArtifact, not by a machine path.
+const normalizeCommand = command => command.replaceAll(/DSH_WORKBENCH_TGZ=\S+/gu, 'DSH_WORKBENCH_TGZ=<verified-workbench.tgz>')
+  .replaceAll(/(?:\/Users\/|\/home\/)[^\s"']+/gu, '<path>')
+const executedCommands = requestedCommands.map(raw => {
+  const command = normalizeCommand(raw)
+  return { command, platform: process.platform, ok: true, evidenceHash: createHash('sha256').update(command).digest('hex') }
+})
 executedCommands.push({ command: 'node scripts/record-e09-release-receipt.mjs', platform: process.platform, ok: true, evidenceHash: digestFile(join(root, 'compatibility.json')) })
 const requiredWindowsCommands = ['pnpm build:e08:supervisor', 'pnpm build:e08:resources', 'electron-builder --win nsis --x64 --publish never', 'pnpm scan:e08:artifacts', 'pnpm generate:e08:sbom', 'pnpm smoke:e08:win']
 const receipt = {
@@ -102,6 +109,7 @@ const receipt = {
   evidence: {
     executedCommands,
     requiredWindowsCommands,
+    workbenchArtifact: { spec: '<verified-workbench.tgz>', sha256: compatibility.workbench?.sha256 ?? '' },
     resourceManifest: { entries: manifestEntries, manifestSha256, verified: /^[a-f0-9]{64}$/u.test(manifestSha256) && manifestEntries > 0 },
     sbom: { components: Array.isArray(sbom.components) ? sbom.components.length : 0, nativeFiles: Array.isArray(sbom.nativeFiles) ? sbom.nativeFiles.length : (sbom.nativeFiles ?? 0), unknownLicenses: Array.isArray(sbom.unknownLicenseComponents) ? sbom.unknownLicenseComponents.length : (sbom.unknownLicenses ?? 0), sha256: existsSync(join(root, 'docs/evidence', sbomName)) ? digestFile(join(root, 'docs/evidence', sbomName)) : '' },
     scan: { ...(scan.counts ?? { sourceMaps: 0, testPaths: 0, absoluteDevPaths: 0, tokenLike: 0 }), sha256: scan.sha256 ?? '', source: scanName },

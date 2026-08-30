@@ -23,7 +23,7 @@ describe('E06 diagnostics collection', () => {
       }))
       writeFileSync(join(profileDir, 'pnpm-lock.yaml'), 'lockfileVersion: {{{ not yaml ]]')
       mkdirSync(join(profileDir, 'node_modules', '@icomposer', 'workbench'), { recursive: true })
-      appendHarnessLog(userData, 'normal', '[rc7] boot exploded near /Users/junjie.zhang/secret\n')
+      appendHarnessLog(userData, 'normal', '[rc7] boot exploded near /Users/example/secret\n')
 
       const service = new DiagnosticsService(pm, userData)
       const payload = service.collect({ mode: 'normal', phase: 'failed', message: `boom at ${dshHome}/profiles/web`, stderrTail: '' })
@@ -35,7 +35,7 @@ describe('E06 diagnostics collection', () => {
       expect(payload.profile.bundles).toContain('@icomposer/workbench')
       expect(payload.message).not.toContain(dshHome)
       expect(payload.logTail).toContain('boot exploded')
-      expect(payload.logTail).not.toContain('/Users/junjie.zhang')
+      expect(payload.logTail).not.toContain('/Users/example')
     } finally {
       rmSync(tmp, { recursive: true, force: true })
     }

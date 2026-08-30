@@ -12,9 +12,8 @@ import { DiagnosticsService } from '../src/main/app/diagnostics.ts'
 import { WindowStateStore } from '../src/main/app/window-state.ts'
 import { createHarnessWindow } from '../src/main/windows/harness-window.ts'
 import { createFailureWindow } from '../src/main/windows/failure-window.ts'
+import { WORKBENCH_TGZ, WORKBENCH_SHA256 as WB_SHA } from './support/workbench.ts'
 
-const WORKBENCH_TGZ = '/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz'
-const WB_SHA = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
 const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
 const NODE = '/opt/homebrew/bin/node'
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e05e06-'))

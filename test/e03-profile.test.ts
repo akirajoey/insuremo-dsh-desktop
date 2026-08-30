@@ -6,9 +6,8 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { PnpmLauncher } from '../src/main/profile/pnpm-launcher'
 import { BundleReconciler } from '../src/main/profile/bundle-reconciler'
 import { ProfileManager } from '../src/main/profile/profile-manager'
+import { WORKBENCH_TGZ as TGZ, WORKBENCH_SHA256 as SHA } from './support/workbench'
 
-const TGZ = '/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz'
-const SHA = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
 const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
 const NODE = '/opt/homebrew/bin/node'
 

@@ -6,10 +6,9 @@ import { ProfileManager } from '../src/main/profile/profile-manager'
 import { PnpmLauncher } from '../src/main/profile/pnpm-launcher'
 import { BundleReconciler } from '../src/main/profile/bundle-reconciler'
 import { PluginService, sanitizeErrorMessage } from '../src/main/plugins/plugin-service'
+import { WORKBENCH_TGZ, WORKBENCH_SHA256 as WB_SHA } from './support/workbench'
 
 const TGZ = '/tmp/e04-test-plugin.tgz'
-const WORKBENCH_TGZ = '/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz'
-const WB_SHA = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
 const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
 const NODE = '/opt/homebrew/bin/node'
 
@@ -90,9 +89,9 @@ describe('E04 plugin service', () => {
 
     const sanitized = sanitizeErrorMessage(
       `staged pnpm failed: ENOENT at ${svc['pm'].dshHome}/profiles/web and /tmp/insuremo-dsh-e04-xyz/cache.tgz`,
-      [svc['pm'].userData, svc['pm'].dshHome, '/Users/junjie.zhang'],
+      [svc['pm'].userData, svc['pm'].dshHome, '/Users/example'],
     )
-    expect(sanitized).not.toContain('/Users/junjie.zhang')
+    expect(sanitized).not.toContain('/Users/example')
     expect(sanitized).not.toContain('/tmp/insuremo-dsh-e04-xyz')
     expect(sanitized).toContain('<redacted>')
     expect(sanitized).toContain('<path>')
