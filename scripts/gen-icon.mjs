@@ -1,94 +1,113 @@
 /**
- * Generate the desktop shell application icon (build/icon.png, 512x512).
- * Deterministic, dependency-free PNG writer: a rounded teal square with a
- * white three-dot "dsh" motif. Placeholder pending formal brand design
- * (final icon identity is finalized with E07 packaging).
+ * Assemble the application icon set from the single active design source
+ * (design/insuremo-dsh-glass-icon-v2-imo.png, hash-pinned below).
+ *
+ * - build/icon.png  — the committed 1024x1024 derivative (dock, BrowserWindow,
+ *   menu, and electron-builder's icns input).
+ * - build/icon.ico  — a Windows ICO assembled from the committed PNG ladder
+ *   (16..256 PNG-embedded entries), pure-Node and byte-deterministic.
+ *
+ * The script uses repository-relative paths only, performs no image
+ * processing (derivatives are committed under design/icons/), and has no
+ * dependency on sips, Pillow, or ImageMagick, so output is identical on
+ * macOS and Windows.
  */
-import { deflateSync } from 'node:zlib'
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const SIZE = 512
+const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+export const ICON_SOURCE = 'design/insuremo-dsh-glass-icon-v2-imo.png'
+export const ICON_SOURCE_SHA256 = '6fb21082817bfcd7cfffe57e791bd4e11467561db71a2d7a17d772fd971188c7'
+export const ICON_SOURCE_SIZE = 1254
+export const ICON_PNG_SIZE = 1024
+export const ICO_LADDER = [16, 24, 32, 48, 64, 128, 256]
 
-function pixel(x, y) {
-  const margin = 48
-  const radius = 96
-  const inside = x >= margin && x < SIZE - margin && y >= margin && y < SIZE - margin
-  if (!inside) return [0, 0, 0, 0]
-  // rounded corners
-  const cx = x < margin + radius ? margin + radius : x >= SIZE - margin - radius ? SIZE - margin - radius : x
-  const cy = y < margin + radius ? margin + radius : y >= SIZE - margin - radius ? SIZE - margin - radius : y
-  const dx = x - cx
-  const dy = y - cy
-  if (dx * dx + dy * dy > radius * radius) return [0, 0, 0, 0]
-  // three diagonal dots motif
-  const dots = [[170, 170], [256, 256], [342, 342]]
-  for (const [px, py] of dots) {
-    const ddx = x - px
-    const ddy = y - py
-    if (ddx * ddx + ddy * ddy <= 46 * 46) return [255, 255, 255, 255]
-  }
-  // subtle vertical gradient teal
-  const t = (y - margin) / (SIZE - 2 * margin)
-  return [Math.round(19 + 8 * t), Math.round(124 + 16 * t), Math.round(139 + 18 * t), 255]
+/** Committed derivative pins (sha256 of each design/icons/icon-<size>.png). */
+export const ICON_DERIVATIVE_SHA256 = {
+  16: 'aa335327471b1b2697a2da8dc4f8d031bd11502c91a1825e818242401fd78ad0',
+  24: 'd945e2206c674a4d4423ec16d1a326d5416e98796b5f33caf025e653dcf7db37',
+  32: 'e8a9bb2dcf98a24477763c7a88bb9590c86c7eae23848fef321ef82a14d575c1',
+  48: '2f2d78872b57212b2e0fa62d8e7f3b5dc41fa6c76f3ab25cfefcf94753b80f1a',
+  64: '62eb5069e5fb6d94f26e0481937f512cb74201e9f941f7d42c69bb69ba6798d8',
+  128: '2311b5954ca187bd083d6f8e0b9a9e632cf09786609c419b86362797d451aab3',
+  256: 'b1af57f75c60388a49cae3f7d6f6711b8c0fff79f615285d8fe9b41d85de6d86',
+  512: 'e3dafb46b4291b4f4c849fc3cf071c05fbf5bfbb05ee797b7af5cda698e69500',
+  1024: '2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6',
 }
 
-function chunk(type, data) {
-  const len = Buffer.alloc(4)
-  len.writeUInt32BE(data.length)
-  const body = Buffer.concat([Buffer.from(type, 'ascii'), data])
-  const crcTable = crc32Table()
-  let crc = 0xffffffff
-  for (const byte of body) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8)
-  const crcBuf = Buffer.alloc(4)
-  crcBuf.writeUInt32BE((crc ^ 0xffffffff) >>> 0)
-  return Buffer.concat([len, body, crcBuf])
+export function sha256(bytes) {
+  return createHash('sha256').update(bytes).digest('hex')
 }
 
-function crc32Table() {
-  const table = new Int32Array(256)
-  for (let n = 0; n < 256; n += 1) {
-    let c = n
-    for (let k = 0; k < 8; k += 1) c = (c & 1) !== 0 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
-    table[n] = c
-  }
-  return table
+/** Read a PNG's IHDR width/height without any image dependency. */
+export function pngSize(bytes) {
+  const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+  if (bytes.length < 24 || !bytes.subarray(0, 8).equals(signature)) throw new Error('not a PNG file')
+  if (bytes.readUInt32BE(8) !== 13 || bytes.toString('ascii', 12, 16) !== 'IHDR') throw new Error('PNG IHDR chunk missing')
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
 }
 
-const raw = Buffer.alloc(SIZE * (1 + SIZE * 4))
-for (let y = 0; y < SIZE; y += 1) {
-  const rowStart = y * (1 + SIZE * 4)
-  raw[rowStart] = 0 // filter: none
-  for (let x = 0; x < SIZE; x += 1) {
-    const [r, g, b, a] = pixel(x, y)
-    const offset = rowStart + 1 + x * 4
-    raw[offset] = r; raw[offset + 1] = g; raw[offset + 2] = b; raw[offset + 3] = a
-  }
+function readLadderPng(size) {
+  const path = join(root, 'design', 'icons', `icon-${size}.png`)
+  const bytes = readFileSync(path)
+  const digest = sha256(bytes)
+  if (digest !== ICON_DERIVATIVE_SHA256[size]) throw new Error(`icon derivative hash mismatch: icon-${size}.png ${digest}`)
+  const { width, height } = pngSize(bytes)
+  if (width !== size || height !== size) throw new Error(`icon derivative dimension mismatch: icon-${size}.png is ${width}x${height}`)
+  return bytes
 }
-const ihdr = Buffer.alloc(13)
-ihdr.writeUInt32BE(SIZE, 0)
-ihdr.writeUInt32BE(SIZE, 4)
-ihdr[8] = 8 // bit depth
-ihdr[9] = 6 // RGBA
-const png = Buffer.concat([
-  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-  chunk('IHDR', ihdr),
-  chunk('IDAT', deflateSync(raw, { level: 9 })),
-  chunk('IEND', Buffer.alloc(0)),
-])
-const iconDir = Buffer.alloc(22)
-iconDir.writeUInt16LE(0, 0)
-iconDir.writeUInt16LE(1, 2)
-iconDir.writeUInt16LE(1, 4)
-iconDir[6] = 0; iconDir[7] = 0; iconDir[8] = 0; iconDir[9] = 0
-iconDir.writeUInt16LE(1, 10)
-iconDir.writeUInt16LE(32, 12)
-iconDir.writeUInt32LE(png.length, 14)
-iconDir.writeUInt32LE(22, 18)
-const ico = Buffer.concat([iconDir, png])
-const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'build', 'icon.png')
-mkdirSync(dirname(outPath), { recursive: true })
-writeFileSync(outPath, png)
-writeFileSync(join(dirname(outPath), 'icon.ico'), ico)
-console.log(`icon written: ${outPath} (${png.length} bytes); build/icon.ico (${ico.length} bytes)`)
+
+/** Verify the pinned design source and read the committed derivative ladder. */
+export function verifyDesignAssets() {
+  const sourceBytes = readFileSync(join(root, ICON_SOURCE))
+  const digest = sha256(sourceBytes)
+  if (digest !== ICON_SOURCE_SHA256) throw new Error(`design source hash mismatch: ${digest}`)
+  const { width, height } = pngSize(sourceBytes)
+  if (width !== ICON_SOURCE_SIZE || height !== ICON_SOURCE_SIZE) throw new Error(`design source must be ${ICON_SOURCE_SIZE}x${ICON_SOURCE_SIZE}, got ${width}x${height}`)
+  const ladder = {}
+  for (const size of Object.keys(ICON_DERIVATIVE_SHA256).map(Number)) ladder[size] = readLadderPng(size)
+  return { sourceBytes, ladder, sourceSha256: digest }
+}
+
+/** Assemble a PNG-embedded Windows ICO; entries must be square PNGs. */
+export function assembleIco(entries) {
+  const header = Buffer.alloc(6)
+  header.writeUInt16LE(0, 0)
+  header.writeUInt16LE(1, 2) // type: icon
+  header.writeUInt16LE(entries.length, 4)
+  const directory = Buffer.alloc(16 * entries.length)
+  let offset = header.length + directory.length
+  const payloads = []
+  entries.forEach(({ size, bytes }, index) => {
+    const { width, height } = pngSize(bytes)
+    if (width !== size || height !== size) throw new Error(`ICO entry ${size} payload is ${width}x${height}`)
+    const base = index * 16
+    directory[base] = size >= 256 ? 0 : size // 0 encodes 256
+    directory[base + 1] = size >= 256 ? 0 : size
+    directory[base + 2] = 0 // palette
+    directory[base + 3] = 0 // reserved
+    directory.writeUInt16LE(1, base + 4) // color planes
+    directory.writeUInt16LE(32, base + 6) // bits per pixel
+    directory.writeUInt32LE(bytes.length, base + 8)
+    directory.writeUInt32LE(offset, base + 12)
+    payloads.push(bytes)
+    offset += bytes.length
+  })
+  return Buffer.concat([header, directory, ...payloads])
+}
+
+function main() {
+  const { ladder } = verifyDesignAssets()
+  const buildDir = join(root, 'build')
+  mkdirSync(buildDir, { recursive: true })
+  const iconPng = ladder[ICON_PNG_SIZE]
+  copyFileSync(join(root, 'design', 'icons', `icon-${ICON_PNG_SIZE}.png`), join(buildDir, 'icon.png'))
+  const ico = assembleIco(ICO_LADDER.map(size => ({ size, bytes: ladder[size] })))
+  writeFileSync(join(buildDir, 'icon.ico'), ico)
+  console.log(`icon written: build/icon.png (${iconPng.length} bytes, ${ICON_PNG_SIZE}x${ICON_PNG_SIZE}); build/icon.ico (${ico.length} bytes, ${ICO_LADDER.join('/')}) from ${ICON_SOURCE} sha256 ${ICON_SOURCE_SHA256.slice(0, 12)}…`)
+}
+
+const invokedDirectly = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
+if (invokedDirectly) main()

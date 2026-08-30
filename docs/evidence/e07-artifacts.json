@@ -8,43 +8,43 @@
   "artifacts": [
     {
       "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
-      "size": 164447255,
-      "sha256": "ed14de2eb8eba4158625074c1875fbbe22afd55c14a297db6ab9157d05d02cf0"
+      "size": 170712184,
+      "sha256": "79eebae1f650f4b9e96cb8fe4cea8420efc154997a92a9f141512f4c1a0aa517"
     },
     {
       "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
-      "size": 173739,
-      "sha256": "d0c3487804392531fa6e6512eb72f21b3979615a35cc28ba4ca049318f6b049a"
+      "size": 179562,
+      "sha256": "e06440ff376acf79b7fbe8e3849a90c0d5a84192b7e26c1b0057cc3b9139efc0"
     },
     {
       "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
-      "size": 172990434,
-      "sha256": "908959db40a8dec89baf9c87dd0f4cec84cc719f3767e85993ddc28cd3368810"
+      "size": 177092515,
+      "sha256": "3bb2099f98ebd069aad666972e3465cd9a7c57e36ef5ce494f92d448b679abff"
     },
     {
       "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
-      "size": 177653,
-      "sha256": "c64c156d29c358c27c21a3c50588de9f3fefe7afa32b26e14e519cf15716a8a8"
+      "size": 181048,
+      "sha256": "3ec57318d9a40ef9e82073cd0807dee3620bc08a204724d005c94e2a2d28f89f"
     },
     {
       "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
-      "size": 108043946,
-      "sha256": "359113dba008985496811e28fb857d5ecb5be2496306f309c1f29ffa8f43916a"
+      "size": 114615439,
+      "sha256": "32aa0b510b58a746f5539d449b63209f34d0a77fa2f0ad009dff030fb6fd193c"
     },
     {
       "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
-      "size": 114599,
-      "sha256": "1f0091072ac050b7512c2940d073f040586d6c15966ccf3c5e4a66728759b551"
+      "size": 120069,
+      "sha256": "0cfde86c3f88327faf7d9e14e403e998b1ab1c72ae6cacc8322d40ffeb88748e"
     },
     {
       "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
-      "size": 104738405,
-      "sha256": "d1937ff2cb7c6c680e2e788ddfdf52ce983288b4048150f6c25f07c4325396f5"
+      "size": 108840486,
+      "sha256": "55a2f9ea0ce16806193a32e04b428789ab977e4fd76fa27ad6a09f0151166d4b"
     },
     {
       "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
-      "size": 110240,
-      "sha256": "55c987dc7a38cb6ef4d39d5ad79e70964ccc1667071b76e774250100d5ec3f6c"
+      "size": 112937,
+      "sha256": "ab83a901b2af8e6126ced53ab593d321de4c20f4dfe59cb6ddb1f2cd85c60b64"
     }
   ],
   "packagedDirectories": {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "task": "TASK-071",
+  "task": "TASK-071/TASK-072",
   "platform": "darwin",
   "arch": "arm64",
   "electron": "43.4.0",
@@ -17,26 +17,26 @@
       "artifacts": [
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
-          "size": 172990434,
-          "sha256": "908959db40a8dec89baf9c87dd0f4cec84cc719f3767e85993ddc28cd3368810"
+          "size": 177092515,
+          "sha256": "3bb2099f98ebd069aad666972e3465cd9a7c57e36ef5ce494f92d448b679abff"
         },
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
-          "size": 177653,
-          "sha256": "c64c156d29c358c27c21a3c50588de9f3fefe7afa32b26e14e519cf15716a8a8"
+          "size": 181048,
+          "sha256": "3ec57318d9a40ef9e82073cd0807dee3620bc08a204724d005c94e2a2d28f89f"
         },
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
-          "size": 164447255,
-          "sha256": "ed14de2eb8eba4158625074c1875fbbe22afd55c14a297db6ab9157d05d02cf0"
+          "size": 170712184,
+          "sha256": "79eebae1f650f4b9e96cb8fe4cea8420efc154997a92a9f141512f4c1a0aa517"
         },
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
-          "size": 173739,
-          "sha256": "d0c3487804392531fa6e6512eb72f21b3979615a35cc28ba4ca049318f6b049a"
+          "size": 179562,
+          "sha256": "e06440ff376acf79b7fbe8e3849a90c0d5a84192b7e26c1b0057cc3b9139efc0"
         }
       ],
-      "installedAppBytes": 516284416,
+      "installedAppBytes": 520372224,
       "hiddenPackagedSmoke": {
         "ok": true,
         "settings": {
@@ -74,7 +74,13 @@
         "markerVariant": "full",
         "runtimeSource": "embedded",
         "embeddedRuntimePresent": true,
-        "runtimeManifestEntries": 27775
+        "runtimeManifestEntries": 27775,
+        "cFBundleIconFile": "icon.icns",
+        "iconIcnsPresent": true,
+        "iconIcnsLargestRep": "icon_512x512@2x.png (1024x1024)",
+        "iconIcnsLargestRepSha256": "2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6",
+        "iconIcnsLargestRepMatchesDesignDerivative": true,
+        "verification": "iconutil -c iconset extraction of the packaged app icon.icns"
       }
     },
     "thin": {
@@ -82,26 +88,26 @@
       "artifacts": [
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
-          "size": 104738405,
-          "sha256": "d1937ff2cb7c6c680e2e788ddfdf52ce983288b4048150f6c25f07c4325396f5"
+          "size": 108840486,
+          "sha256": "55a2f9ea0ce16806193a32e04b428789ab977e4fd76fa27ad6a09f0151166d4b"
         },
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
-          "size": 110240,
-          "sha256": "55c987dc7a38cb6ef4d39d5ad79e70964ccc1667071b76e774250100d5ec3f6c"
+          "size": 112937,
+          "sha256": "ab83a901b2af8e6126ced53ab593d321de4c20f4dfe59cb6ddb1f2cd85c60b64"
         },
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
-          "size": 108043946,
-          "sha256": "359113dba008985496811e28fb857d5ecb5be2496306f309c1f29ffa8f43916a"
+          "size": 114615439,
+          "sha256": "32aa0b510b58a746f5539d449b63209f34d0a77fa2f0ad009dff030fb6fd193c"
         },
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
-          "size": 114599,
-          "sha256": "1f0091072ac050b7512c2940d073f040586d6c15966ccf3c5e4a66728759b551"
+          "size": 120069,
+          "sha256": "0cfde86c3f88327faf7d9e14e403e998b1ab1c72ae6cacc8322d40ffeb88748e"
         }
       ],
-      "installedAppBytes": 242880512,
+      "installedAppBytes": 246968320,
       "hiddenPackagedSmoke": {
         "ok": true,
         "invalidRuntimeRecoveryShown": true,
@@ -131,7 +137,13 @@
         "bundleId": "com.insuremo.dsh.desktop",
         "markerVariant": "thin",
         "runtimeSource": "external",
-        "embeddedRuntimePresent": false
+        "embeddedRuntimePresent": false,
+        "cFBundleIconFile": "icon.icns",
+        "iconIcnsPresent": true,
+        "iconIcnsLargestRep": "icon_512x512@2x.png (1024x1024)",
+        "iconIcnsLargestRepSha256": "2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6",
+        "iconIcnsLargestRepMatchesDesignDerivative": true,
+        "verification": "iconutil -c iconset extraction of the packaged app icon.icns"
       }
     }
   },
@@ -142,5 +154,34 @@
   "sharedAppIdentity": {
     "appId": "com.insuremo.dsh.desktop",
     "userData": "shared (same appId and userData for Full and Thin)"
+  },
+  "icon": {
+    "source": {
+      "path": "design/insuremo-dsh-glass-icon-v2-imo.png",
+      "sha256": "6fb21082817bfcd7cfffe57e791bd4e11467561db71a2d7a17d772fd971188c7",
+      "width": 1254,
+      "height": 1254
+    },
+    "buildPng": {
+      "path": "build/icon.png",
+      "size": 1024,
+      "sha256": "2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6",
+      "from": "design/icons/icon-1024.png"
+    },
+    "buildIco": {
+      "path": "build/icon.ico",
+      "pngEntries": [
+        16,
+        24,
+        32,
+        48,
+        64,
+        128,
+        256
+      ],
+      "widthByte256": 0
+    },
+    "derivativesPinnedIn": "scripts/gen-icon.mjs (ICON_DERIVATIVE_SHA256); generation command recorded in design/README.md",
+    "macIconPath": "electron-builder icon.icns from build/icon.png"
   }
 }
