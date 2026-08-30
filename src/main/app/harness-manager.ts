@@ -8,12 +8,12 @@ import { BundleReconciler } from '../profile/bundle-reconciler.ts'
 import { ProfileManager } from '../profile/profile-manager.ts'
 import { appendHarnessLog, harnessLogPath } from './logs.ts'
 import { appRoot } from './app-root.ts'
-import { captureWindowsEnvironment } from './windows-environment.ts'
+import { captureDesktopEnvironment } from './windows-environment.ts'
 
 /** Resolve the wrapper from source in dev or the hashed Vite asset in out/. */
-export function resolveWrapperPath(): string {
+export function resolveWrapperPath(runtimeRoot?: string): string {
   if (app.isPackaged) {
-    const bundled = join(process.resourcesPath, 'dsh-runtime/harness/wrapper.cjs')
+    const bundled = join(runtimeRoot ?? process.resourcesPath, runtimeRoot === undefined ? 'dsh-runtime/harness/wrapper.cjs' : 'harness/wrapper.cjs')
     if (existsSync(bundled)) return bundled
     throw new Error('packaged runtime wrapper is missing')
   }
@@ -35,11 +35,17 @@ export interface HarnessManagerOptions {
   runtimePin: string
   pnpmEntry: string
   nodePath: string
+  /** Shell environment captured once for runtime and package operations. */
+  environment?: Record<string, string>
   shutdownGraceMs?: number
   forkMode?: 'fork' | 'utility'
   execPath?: string
   /** Signed Windows helper that owns the bundled Node Job Object. */
   supervisorPath?: string
+  /** Verified runtime root; points outside the app for Thin builds. */
+  runtimeRoot?: string
+  /** Explicit opt-in for the packaged Electron run-as-Node experiment. */
+  runAsNode?: boolean
 }
 
 /**
@@ -95,16 +101,17 @@ export class HarnessManager {
    */
   async start(mode: HarnessMode = 'normal'): Promise<RuntimeSnapshot> {
     await this.stop()
+    const environment = this.options.environment ?? captureDesktopEnvironment()
     this.mode = mode
-    if (mode === 'normal') await this.ensureBundledWorkbench()
-    const dshHome = mode === 'safe' ? await this.prepareSafeHome() : this.options.profileManager.dshHome
+    if (mode === 'normal') await this.ensureBundledWorkbench(environment)
+    const dshHome = mode === 'safe' ? await this.prepareSafeHome(environment) : this.options.profileManager.dshHome
     const controller = new RuntimeController({
       launchId: `desktop-${mode}-${Date.now()}`,
       dshHome,
-      wrapperPath: resolveWrapperPath(),
+      wrapperPath: resolveWrapperPath(this.options.runtimeRoot),
       cwd: this.options.profileManager.runtimeAnchor ?? process.cwd(),
       env: {
-        ...captureWindowsEnvironment(),
+        ...environment,
         DSH_HOME: dshHome,
         NO_COLOR: '1',
         DSH_DESKTOP_LOG: harnessLogPath(this.options.userData, mode),
@@ -113,6 +120,7 @@ export class HarnessManager {
       forkMode: this.options.forkMode ?? 'utility',
       execPath: this.options.execPath,
       supervisorPath: this.options.supervisorPath,
+      runAsNode: this.options.runAsNode,
       startTimeoutMs: 60_000,
     })
     this.controller = controller
@@ -124,7 +132,7 @@ export class HarnessManager {
   }
 
   /** Install the verified bundled Workbench into a new packaged profile. */
-  private async ensureBundledWorkbench(): Promise<void> {
+  private async ensureBundledWorkbench(environment: Record<string, string>): Promise<void> {
     const pm = this.options.profileManager
     if (!pm.workbenchArtifactConfigured) return
     const profileDir = join(pm.dshHome, 'profiles/web')
@@ -146,6 +154,8 @@ export class HarnessManager {
       nodePath: this.options.nodePath,
       pnpmEntry: this.options.pnpmEntry,
       cwd: staging,
+      environment,
+      runAsNode: this.options.runAsNode,
       timeoutMs: 300_000,
     }, 'add', ['--save-exact', `file:${cached}`])
     if (result.exitCode !== 0) throw new Error(`bundled Workbench install failed: ${result.stderr.slice(-600)}`)
@@ -158,7 +168,7 @@ export class HarnessManager {
    * the pinned runtime graph, no home patch layer, no workbench, no
    * third-party plugins. The normal home is never modified.
    */
-  private async prepareSafeHome(): Promise<string> {
+  private async prepareSafeHome(environment: Record<string, string>): Promise<string> {
     const safeHome = this.options.profileManager.materializeSafeHome({
       version: this.options.runtimePin,
       packages: readRuntimePackages(appRoot()),
@@ -172,6 +182,8 @@ export class HarnessManager {
         nodePath: this.options.nodePath,
         pnpmEntry: this.options.pnpmEntry,
         cwd: profileDir,
+        environment,
+        runAsNode: this.options.runAsNode,
         timeoutMs: 300_000,
       }, 'add', ['--save-exact', `@deepseek-ai/dsh-base@${pin}`, `@deepseek-ai/dsh-web-app@${pin}`])
       if (result.exitCode !== 0) throw new Error(`safe home install failed: ${result.stderr.slice(-600)}`)

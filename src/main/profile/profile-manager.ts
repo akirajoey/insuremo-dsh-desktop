@@ -40,6 +40,8 @@ export interface ProfileManagerOptions {
   workbenchTgzPath?: string
   /** Expected SHA256 of the workbench tgz. Optional for plugin-only operations. */
   workbenchSha256?: string
+  /** Explicit opt-in for an Electron executable used as Node. */
+  runAsNode?: boolean
 }
 
 const PROFILE_DIR = 'profiles/web'
@@ -53,6 +55,7 @@ export class ProfileManager {
   private readonly nodePath: string
   private readonly workbenchTgzPath: string
   private readonly workbenchSha256: string
+  private readonly runAsNode: boolean
   private readonly stagingRoot: string
   private readonly journalPath: string
 
@@ -64,6 +67,7 @@ export class ProfileManager {
     this.nodePath = options.nodePath
     this.workbenchTgzPath = options.workbenchTgzPath ?? ''
     this.workbenchSha256 = options.workbenchSha256 ?? ''
+    this.runAsNode = options.runAsNode === true
     this.stagingRoot = join(this.dshHome, '.staging')
     this.journalPath = join(this.userData, 'desktop-state', 'profile-operation.json')
   }
@@ -119,9 +123,13 @@ export class ProfileManager {
    */
   healStagingPeerFarm(stagingDir: string): void {
     const { execFileSync } = require2('node:child_process') as typeof import('node:child_process')
+    const nodeEnvironment = { ...process.env }
+    delete nodeEnvironment.ELECTRON_RUN_AS_NODE
+    if (this.runAsNode) nodeEnvironment.ELECTRON_RUN_AS_NODE = '1'
     const appAnchor = execFileSync(this.nodePath, ['-e', "console.log(require.resolve('@deepseek-ai/dsh/package.json'))"], {
       cwd: this.runtimeAnchor ?? process.cwd(),
       encoding: 'utf8',
+      env: nodeEnvironment,
     }).trim()
     const links = new Map<string, string>()
     const queue: Array<{ anchor: string; manifest: Record<string, unknown> }> = []

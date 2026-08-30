@@ -8,8 +8,9 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const appPath = process.argv[2] ?? join(root, 'release/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop')
 const pluginTgz = process.env.DSH_TEST_PLUGIN_TGZ ?? '/tmp/e04-test-plugin.tgz'
+const ownsTestUserData = process.env.DSH_TEST_USER_DATA === undefined
 const testUserData = process.env.DSH_TEST_USER_DATA ?? mkdtempSync(join(tmpdir(), 'e07-packaged-clean-'))
-const autoQuitMs = '120000'
+const autoQuitMs = process.env.DSH_TEST_AUTO_QUIT_AFTER_MS ?? '120000'
 const normalPort = 9241
 const safePort = 9242
 const beforeHomeDsh = snapshotTree(join(process.env.HOME ?? '', '.dsh'))
@@ -72,6 +73,22 @@ async function evaluate(target, expression) {
 async function brandProbe(target) {
   const value = await evaluate(target, `(async()=>{const imgs=[...document.images].map(i=>({src:i.src,w:i.getBoundingClientRect().width,h:i.getBoundingClientRect().height,x:i.getBoundingClientRect().x,y:i.getBoundingClientRect().y})).filter(i=>i.w>0&&i.h>0);const word=imgs.find(i=>i.src.includes('insuremo-wordmark'));return JSON.stringify({title:document.title,wordmark:word??null,brandStatus:word===undefined?null:(await fetch(word.src)).status})})()`)
   return JSON.parse(value)
+}
+
+async function settingsProbe(target) {
+  const value = await evaluate(target, `(async()=>{const response=await fetch('/api/icomposer-workbench/insuremo/overview?fast=0',{headers:{Accept:'application/json'}});const payload=await response.json();return JSON.stringify({httpStatus:response.status,imo:{available:payload?.imo?.available===true,current:typeof payload?.imo?.current==='string'?payload.imo.current:null},skills:{installed:Number.isFinite(payload?.skills?.installed)?payload.skills.installed:0}})})()`)
+  return JSON.parse(value)
+}
+
+async function waitSettings(target) {
+  return waitFor(async () => {
+    try {
+      const value = await settingsProbe(target)
+      return value.httpStatus === 200 && value.imo.available && value.imo.current === '0.2.20' && value.skills.installed > 0 ? value : undefined
+    } catch {
+      return undefined
+    }
+  }, 60_000, 'Settings IMO/Skills overview')
 }
 
 async function waitBrand(target, label) {
@@ -151,6 +168,7 @@ async function launch(mode, port, userData, openPluginManager) {
       ...process.env,
       DSH_DESKTOP_TEST_USER_DATA: userData,
       DSH_DESKTOP_TEST_AUTO_QUIT_AFTER_MS: autoQuitMs,
+      DSH_DESKTOP_TEST_HEADLESS: '1',
       ...(openPluginManager ? { DSH_DESKTOP_TEST_OPEN_PLUGIN_MANAGER: '1', DSH_DESKTOP_TEST_PLUGIN_TGZ: pluginTgz } : {}),
     },
     stdio: ['ignore', fd, fd],
@@ -177,6 +195,7 @@ async function normalPhase() {
     const harness = await waitTarget(normalPort, target => target.type === 'page' && target.url.startsWith('http://127.0.0.1:'), 'normal harness')
     const plugin = await waitTarget(normalPort, target => target.type === 'page' && target.url.includes('/plugin-manager/index.html'), 'plugin manager')
     const brand = await waitBrand(harness, 'normal brand')
+    const settings = await waitSettings(harness)
     const installed = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.installCapability('tgz:packaged-smoke')))()`))
     if (!installed.ok) throw new Error(`packaged tgz install failed: ${JSON.stringify(installed)}`)
     const listed = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.list()))()`))
@@ -192,7 +211,7 @@ async function normalPhase() {
     const closed = await phase.closed
     if (closed.code !== 0) throw new Error(`normal packaged app exit: ${JSON.stringify(closed)}`)
     if (existsSync(join(testUserData, 'desktop-state/runtime-owner.json'))) throw new Error('normal ownership marker remains')
-    return { mode: 'normal', brand, plugin: { install: true, remove: true, gone: true }, lan, manifest: { workbench: true }, exit: closed, logPath: '<temp>/e07-packaged-normal.log' }
+    return { mode: 'normal', brand, settings, plugin: { install: true, remove: true, gone: true }, lan, manifest: { workbench: true }, exit: closed, logPath: '<temp>/e07-packaged-normal.log' }
   } finally {
     await stopIfAlive(phase.child)
   }
@@ -239,5 +258,6 @@ try {
   result.normalProcess = processSnapshot()
 }
 writeFileSync('/tmp/e07-packaged-smoke-result.json', JSON.stringify(result, null, 2) + '\n')
+if (ownsTestUserData) rmSync(testUserData, { recursive: true, force: true })
 console.log(JSON.stringify(result, null, 2))
 if (!result.ok) process.exitCode = 1

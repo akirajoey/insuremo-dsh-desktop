@@ -14,6 +14,10 @@ export interface PluginServiceOptions {
   capabilityDir: string
   pnpmEntry: string
   nodePath: string
+  /** Shell environment used by every desktop-side pnpm invocation. */
+  environment?: Record<string, string>
+  /** Explicit opt-in for an Electron executable used as Node. */
+  runAsNode?: boolean
   workbenchName: string
 }
 
@@ -43,6 +47,8 @@ export class PluginService {
   private readonly capabilityDir: string
   private readonly pnpmEntry: string
   private readonly nodePath: string
+  private readonly environment: Record<string, string> | undefined
+  private readonly runAsNode: boolean
   private readonly workbenchName: string
   private readonly capabilities = new Map<string, string>()
   private readonly provenancePath: string
@@ -52,6 +58,8 @@ export class PluginService {
     this.capabilityDir = options.capabilityDir
     this.pnpmEntry = options.pnpmEntry
     this.nodePath = options.nodePath
+    this.environment = options.environment
+    this.runAsNode = options.runAsNode === true
     this.workbenchName = options.workbenchName
     this.provenancePath = join(options.profileManager.userData, 'desktop-state', 'plugin-provenance.json')
   }
@@ -116,6 +124,8 @@ export class PluginService {
       nodePath: this.nodePath,
       pnpmEntry: this.pnpmEntry,
       cwd: this.currentProfileDir(),
+      environment: this.environment,
+      runAsNode: this.runAsNode,
       timeoutMs: 180_000,
     }, verb, args)
     return { ok: result.exitCode === 0, stderr: result.stderr }
@@ -164,6 +174,8 @@ export class PluginService {
         nodePath: this.nodePath,
         pnpmEntry: this.pnpmEntry,
         cwd: staging,
+        environment: this.environment,
+        runAsNode: this.runAsNode,
         timeoutMs: 180_000,
       }, operation === 'remove' ? 'remove' : 'add', operation === 'remove' ? [input] : [pnpmArg])
       if (stagedPnpm.exitCode !== 0) throw new Error(`staged pnpm failed: ${stagedPnpm.stderr.slice(0, 500)}`)
@@ -211,6 +223,8 @@ export class PluginService {
         nodePath: this.nodePath,
         pnpmEntry: this.pnpmEntry,
         cwd: staging,
+        environment: this.environment,
+        runAsNode: this.runAsNode,
         timeoutMs: 300_000,
       }, 'install', [])
       if (stagedPnpm.exitCode !== 0) throw new Error(`staged pnpm rebuild failed: ${stagedPnpm.stderr.slice(0, 500)}`)

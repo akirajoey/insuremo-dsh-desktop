@@ -8,13 +8,18 @@ const text = (path: string): string => readFileSync(resolve(root, path), 'utf8')
 
 describe('E08 Windows packaging contract', () => {
   it('pins NSIS x64, Windows icon, signing extensions, and the resource pipeline', () => {
-    const packageJson = JSON.parse(text('package.json')) as { build: { asar: boolean; win: Record<string, unknown> }; scripts: Record<string, string> }
+    const packageJson = JSON.parse(text('package.json')) as { build: { asar: boolean; electronLanguages?: string[]; win: Record<string, unknown> }; scripts: Record<string, string> }
     expect(packageJson.build.asar).toBe(false)
+    expect(packageJson.build.electronLanguages).toEqual(['en', 'zh_CN', 'zh_TW'])
     expect(packageJson.build.win.target).toEqual([{ target: 'nsis', arch: ['x64'] }])
     expect(packageJson.build.win.icon).toBe('build/icon.ico')
     expect(packageJson.build.win.signExts).toEqual(['.exe', '.dll', '.node'])
     expect(packageJson.build.win.extraResources).toEqual([{ from: 'packaging/e08/runtime', to: 'dsh-runtime' }])
-    expect(packageJson.scripts['package:e08:win']).toContain('electron-builder --win nsis --x64')
+    expect(packageJson.scripts['package:e08:win']).toContain('electron-builder --config scripts/electron-builder-config.mjs --win nsis --x64')
+    const shared = text('scripts/electron-builder-config.mjs')
+    expect(shared).toContain("appId: 'com.insuremo.dsh.desktop'")
+    expect(shared).toContain("target: [{ target: 'nsis', arch: ['x64'] }]")
+    expect(shared).toContain("from: 'packaging/e08/runtime', to: 'dsh-runtime'")
     expect(packageJson.scripts['build:e08:supervisor']).toContain('build-runtime-supervisor.ps1')
     expect(packageJson.scripts['build:e08:resources']).toContain('prepare-e08-windows-resources.mjs')
   })

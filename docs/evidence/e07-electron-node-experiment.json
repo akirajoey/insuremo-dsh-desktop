@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "schema": "Electron run-as-Node experiment v1",
+  "app": "InsureMO DSH Desktop",
+  "platform": "darwin",
+  "arch": "arm64",
+  "probes": {
+    "nodeVersion": {
+      "node": "24.18.1",
+      "electron": "43.4.0"
+    },
+    "workerThreads": "worker-ok",
+    "sqlite": "42",
+    "nativeModules": "{\"koffi\":\"object\",\"pty\":\"function\"}",
+    "pty": "pty-ok",
+    "forkIpc": "fork-ok",
+    "pnpmAdd": "1.0.0",
+    "agentWorker": {
+      "value": 42,
+      "error": null,
+      "isolation": "worker-thread"
+    },
+    "harness": {
+      "ok": true,
+      "normal": true,
+      "safe": true,
+      "plugin": true,
+      "settings": true,
+      "cleanup": true
+    }
+  }
+}

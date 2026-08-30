@@ -1,21 +1,14 @@
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, readlinkSync, realpathSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
+import { copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, readlinkSync, realpathSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const version = '24.9.0'
 const targetArch = process.env.DSH_RUNTIME_ARCH ?? process.arch
 if (targetArch !== 'arm64' && targetArch !== 'x64') throw new Error(`unsupported DSH_RUNTIME_ARCH: ${targetArch}`)
-const nodeHashes = {
-  arm64: '961024296c2a8e60daed0784f8b61e0fab5c51d197502a92eff052c72b53209b',
-  x64: '6c9ac12d3160538d96d456dc59a8fec1479e3f8b20bfc0d61bc809eb9ec11417',
-}
 const runtimeRoot = join(root, 'packaging/e07/runtime')
-const cacheRoot = join(root, 'packaging/e07/cache')
-const nodeCache = join(cacheRoot, 'node')
 const workbenchPath = process.env.DSH_WORKBENCH_TGZ
 if (workbenchPath === undefined || !existsSync(workbenchPath)) {
   throw new Error('DSH_WORKBENCH_TGZ must point to the verified Workbench tgz')
@@ -28,36 +21,6 @@ function sha256(path) {
 function commandPath(command) {
   const lookup = process.platform === 'win32' ? 'where' : 'which'
   return execFileSync(lookup, [command], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().split(/\r?\n/u)[0]
-}
-
-async function download(url, destination) {
-  const response = await fetch(url)
-  if (!response.ok) throw new Error(`download failed ${response.status}: ${url}`)
-  const bytes = Buffer.from(await response.arrayBuffer())
-  writeFileSync(destination, bytes)
-}
-
-async function prepareNode(arch) {
-  const archive = join(nodeCache, `node-v${version}-darwin-${arch}.tar.gz`)
-  mkdirSync(nodeCache, { recursive: true })
-  if (!existsSync(archive) || sha256(archive) !== nodeHashes[arch]) {
-    await download(`https://nodejs.org/dist/v${version}/node-v${version}-darwin-${arch}.tar.gz`, archive)
-  }
-  if (sha256(archive) !== nodeHashes[arch]) throw new Error(`Node ${arch} SHA256 mismatch`)
-  const extract = mkdtempSync(join(tmpdir(), `dsh-node-${arch}-`))
-  try {
-    execFileSync('tar', ['-xzf', archive, '-C', extract], { stdio: 'ignore' })
-    const sourceRoot = join(extract, `node-v${version}-darwin-${arch}`)
-    const targetRoot = join(runtimeRoot, 'node', `darwin-${arch}`)
-    mkdirSync(join(targetRoot, 'bin'), { recursive: true })
-    copyFileSync(join(sourceRoot, 'bin/node'), join(targetRoot, 'bin/node'))
-    chmodSync(join(targetRoot, 'bin/node'), 0o755)
-    for (const file of ['LICENSE', 'README.md']) {
-      if (existsSync(join(sourceRoot, file))) copyFileSync(join(sourceRoot, file), join(targetRoot, file))
-    }
-  } finally {
-    rmSync(extract, { recursive: true, force: true })
-  }
 }
 
 function preparePnpm() {
@@ -202,8 +165,8 @@ rmSync(runtimeRoot, { recursive: true, force: true })
 mkdirSync(runtimeRoot, { recursive: true })
 copyFileSync(join(root, 'config/runtime-pins.json'), join(runtimeRoot, 'runtime-pins.json'))
 copyFileSync(join(root, 'build/icon.png'), join(runtimeRoot, 'icon.png'))
-await prepareNode('arm64')
-await prepareNode('x64')
+// Darwin uses Electron 43's verified embedded Node 24.18.1 in run-as-Node
+// mode; standalone Node binaries are intentionally not copied here.
 const pnpmEntry = preparePnpm()
 prepareHarness(pnpmEntry)
 removePackagingNoise(runtimeRoot)
@@ -216,10 +179,12 @@ const files = walk(runtimeRoot).sort((a, b) => a.path.localeCompare(b.path))
 const manifest = {
   schemaVersion: 1,
   runtimeVersion: '0.1.0-rc.7',
-  nodeVersion: version,
+  nodeVersion: '24.18.1',
   runtimeArch: targetArch,
+  nodeMode: 'electron-run-as-node',
+  distribution: 'full-runtime',
   files,
   workbench: { path: 'workbench/icomposer-workbench.tgz', sha256: workbenchSha256 },
 }
 writeFileSync(join(runtimeRoot, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
-  console.log(JSON.stringify({ runtimeRoot, targetArch, pnpmEntry: relative(root, pnpmEntry), fileCount: files.length, workbenchSha256, nodeHashes }, null, 2))
+console.log(JSON.stringify({ runtimeRoot, targetArch, nodeMode: 'electron-run-as-node', pnpmEntry: relative(root, pnpmEntry), fileCount: files.length, workbenchSha256 }, null, 2))

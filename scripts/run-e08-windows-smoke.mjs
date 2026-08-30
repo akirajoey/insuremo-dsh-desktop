@@ -46,6 +46,10 @@ async function brand(page) {
   const raw = await evaluate(page, `(async()=>{const image=[...document.images].map(i=>({src:i.src,w:i.getBoundingClientRect().width,h:i.getBoundingClientRect().height})).find(i=>i.src.includes('insuremo-wordmark')&&i.w>0&&i.h>0);return JSON.stringify({title:document.title,wordmark:image??null,status:image===undefined?null:(await fetch(image.src)).status})})()`)
   return JSON.parse(raw)
 }
+async function settings(page) {
+  const raw = await evaluate(page, `(async()=>{const response=await fetch('/api/icomposer-workbench/insuremo/overview?fast=0',{headers:{Accept:'application/json'}});const payload=await response.json();return JSON.stringify({httpStatus:response.status,imo:{available:payload?.imo?.available===true,current:typeof payload?.imo?.current==='string'?payload.imo.current:null},skills:{installed:Number.isFinite(payload?.skills?.installed)?payload.skills.installed:0}})})()`)
+  return JSON.parse(raw)
+}
 function snapshotTree(path) {
   if (!existsSync(path)) return null
   const result = []
@@ -97,6 +101,7 @@ async function normalPhase() {
     const harness = await target(9351, item => item.type === 'page' && item.url.startsWith('http://127.0.0.1:'), 'normal harness')
     const plugin = await target(9351, item => item.type === 'page' && item.url.includes('/plugin-manager/index.html'), 'plugin manager')
     const brandResult = await waitFor(async () => { try { const value = await brand(harness); return value.status === 200 ? value : undefined } catch { return undefined } }, 30_000, 'normal brand')
+    const settingsResult = await waitFor(async () => { try { const value = await settings(harness); return value.httpStatus === 200 && value.imo.available && value.imo.current === '0.2.20' && value.skills.installed > 0 ? value : undefined } catch { return undefined } }, 60_000, 'Settings IMO/Skills overview')
     const install = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.installCapability('tgz:packaged-smoke')))()`))
     const listed = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.list()))()`))
     const remove = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.remove('@icomposer/test-plugin')))()`))
@@ -104,7 +109,7 @@ async function normalPhase() {
     if (!install.ok || !listed.some(item => item.name === '@icomposer/test-plugin') || !remove.ok || !gone) throw new Error('Windows packaged plugin install/remove failed')
     const closed = await phase.closed
     if (closed.code !== 0 || manifest()?.dependencies?.['@icomposer/workbench'] === undefined) throw new Error('Windows normal phase failed')
-    return { brand: brandResult, plugin: { install: true, remove: true, gone: true }, exit: closed, log: phase.log }
+    return { brand: brandResult, settings: settingsResult, plugin: { install: true, remove: true, gone: true }, exit: closed, log: phase.log }
   } finally { await stopIfAlive(phase) }
 }
 async function safePhase() {

@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process'
+import { captureDesktopEnvironment } from '../app/windows-environment.ts'
 
 export interface PnpmLauncherOptions {
   /** Absolute bundled Node executable. */
@@ -7,6 +8,10 @@ export interface PnpmLauncherOptions {
   pnpmEntry: string
   /** Working directory (the profile directory). */
   cwd: string
+  /** Captured shell environment; defaults to the safe desktop capture. */
+  environment?: Record<string, string>
+  /** Explicit opt-in for an Electron executable used as Node. */
+  runAsNode?: boolean
   /** Extra environment variables. */
   env?: Record<string, string>
   /** Timeout for the pnpm invocation. */
@@ -42,9 +47,12 @@ export class PnpmLauncher {
     for (const argument of args) {
       if (!argument.startsWith('-')) PnpmLauncher.assertSafeSpec(argument)
     }
+    const environment = { ...(options.environment ?? captureDesktopEnvironment()), ...options.env }
+    delete environment.ELECTRON_RUN_AS_NODE
+    if (options.runAsNode === true) environment.ELECTRON_RUN_AS_NODE = '1'
     const child = spawn(options.nodePath, [options.pnpmEntry, verb, ...args], {
       cwd: options.cwd,
-      env: { ...process.env, ...options.env },
+      env: environment,
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: false,
       windowsHide: true,

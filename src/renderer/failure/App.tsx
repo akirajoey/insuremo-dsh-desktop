@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { FailureDiagnostics } from '../../shared/failure-api.ts'
 import './failure.css'
 
-type Busy = 'restart' | 'safe' | 'rollback' | 'remove' | null
+type Busy = 'restart' | 'safe' | 'rollback' | 'remove' | 'runtime' | null
 
 export function App(): JSX.Element {
   const [diagnostics, setDiagnostics] = useState<FailureDiagnostics | undefined>(undefined)
@@ -46,6 +46,21 @@ export function App(): JSX.Element {
         <pre className="fx-pre" data-testid="fx-message">{diagnostics.message || diagnostics.phase}</pre>
         {diagnostics.stderrTail !== '' && <pre className="fx-pre fx-dim" data-testid="fx-stderr">{diagnostics.stderrTail}</pre>}
       </section>
+
+      {diagnostics.runtime.variant === 'thin' && (
+        <section className="fx-card" aria-label="External runtime">
+          <h2>External DSH runtime</h2>
+          <p className="fx-runtime-state">
+            Source: <strong>{diagnostics.runtime.source}</strong>
+            {diagnostics.runtime.rootName === null ? '' : ` (${diagnostics.runtime.rootName})`}
+          </p>
+          {diagnostics.runtime.error !== null && <pre className="fx-pre fx-dim">{diagnostics.runtime.error}</pre>}
+          <button type="button" disabled={busy !== null} onClick={() => void act('runtime', () => window.insuremoFailure.selectRuntime())}>
+            {busy === 'runtime' ? 'Validating…' : 'Select DSH Runtime…'}
+          </button>
+          <p className="fx-dim">Choose a verified runtime directory. The selected path stays in the desktop profile and is never exposed to the page.</p>
+        </section>
+      )}
 
       <section className="fx-card" aria-label="Profile state">
         <h2>Profile state</h2>

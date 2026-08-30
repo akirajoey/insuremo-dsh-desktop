@@ -8,6 +8,7 @@ const api: FailureApi = {
   rollback: () => ipcRenderer.invoke('failure:rollback'),
   rebuild: () => ipcRenderer.invoke('failure:rebuild'),
   removePlugin: (name) => ipcRenderer.invoke('failure:remove-plugin', name),
+  selectRuntime: () => ipcRenderer.invoke('failure:select-runtime'),
   openLogs: () => ipcRenderer.invoke('failure:open-logs'),
 }
 

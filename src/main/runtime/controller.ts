@@ -19,6 +19,8 @@ export interface RuntimeControllerOptions {
   execPath?: string
   /** Signed Windows helper that owns the bundled Node Job Object. */
   supervisorPath?: string
+  /** Explicit opt-in for Electron's run-as-Node executable experiment. */
+  runAsNode?: boolean
 }
 
 interface OwnershipRecord {
@@ -43,6 +45,7 @@ export class RuntimeController {
   private readonly forkMode: 'fork' | 'utility'
   private readonly execPath: string | undefined
   private readonly supervisorPath: string | undefined
+  private readonly runAsNode: boolean
   private state: ControlState = 'idle'
   private child: RuntimeChild | undefined
   private handshake: RuntimeHandshake | undefined
@@ -63,6 +66,7 @@ export class RuntimeController {
     this.forkMode = options.forkMode ?? 'fork'
     this.execPath = options.execPath
     this.supervisorPath = options.supervisorPath
+    this.runAsNode = options.runAsNode === true
     this.ownershipPath = join(this.userData, 'desktop-state', 'runtime-owner.json')
   }
 
@@ -93,6 +97,7 @@ export class RuntimeController {
       cwd: this.cwd,
       env: this.env,
       execPath: this.execPath,
+      runAsNode: this.runAsNode,
     }
     const child = this.supervisorPath !== undefined && process.platform === 'win32'
       ? (await import('./windows-supervisor-launcher.ts')).forkWindowsSupervisor({ ...options, supervisorPath: this.supervisorPath, parentPid: process.pid })

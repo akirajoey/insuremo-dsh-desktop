@@ -125,6 +125,6 @@ copyFileSync(workbenchPath, join(runtimeRoot, 'workbench/icomposer-workbench.tgz
 mkdirSync(join(runtimeRoot, 'supervisor'), { recursive: true })
 copyFileSync(supervisorPath, join(runtimeRoot, 'supervisor/runtime-supervisor.exe'))
 const files = walk(runtimeRoot).sort((a, b) => a.path.localeCompare(b.path))
-const manifest = { schemaVersion: 1, runtimeVersion: '0.1.0-rc.7', nodeVersion: version, runtimeArch: arch, files, workbench: { path: 'workbench/icomposer-workbench.tgz', sha256: workbenchSha256 } }
+const manifest = { schemaVersion: 1, runtimeVersion: '0.1.0-rc.7', nodeVersion: version, runtimeArch: arch, nodeMode: 'bundled', distribution: 'full-runtime', files, workbench: { path: 'workbench/icomposer-workbench.tgz', sha256: workbenchSha256 } }
 writeFileSync(join(runtimeRoot, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
 console.log(JSON.stringify({ runtimeRoot, targetArch: arch, nodeZipSha256: nodeSha256, pnpmEntry, fileCount: files.length, workbenchSha256, supervisor: 'supervisor/runtime-supervisor.exe' }, null, 2))

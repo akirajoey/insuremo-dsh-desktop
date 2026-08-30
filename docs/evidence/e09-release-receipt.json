@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "releaseVersion": "0.1.0",
-  "recordedAt": "2026-08-29T22:39:05.512Z",
+  "recordedAt": "2026-08-30T03:50:00.198Z",
   "platform": "darwin",
   "arch": "arm64",
   "developmentOnly": true,
@@ -40,85 +40,104 @@
   },
   "artifacts": [
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64-mac.zip",
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
       "kind": "file",
-      "size": 257389420,
-      "sha256": "654be8137c0063c19eb3842a94cdd15e589c8e6b9b0dd1210d903938d3338a97",
+      "size": 164447255,
+      "sha256": "ed14de2eb8eba4158625074c1875fbbe22afd55c14a297db6ab9157d05d02cf0",
       "signature": {
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-29T22:39:05.512Z"
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
       }
     },
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64-mac.zip.blockmap",
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
       "kind": "file",
-      "size": 265887,
-      "sha256": "386a5d50b78e188774dfd02e5ab8728b7fd10d16b3e2f74c7293082ca07c7513",
+      "size": 173739,
+      "sha256": "d0c3487804392531fa6e6512eb72f21b3979615a35cc28ba4ca049318f6b049a",
       "signature": {
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-29T22:39:05.512Z"
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
       }
     },
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64.dmg",
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
       "kind": "file",
-      "size": 252708362,
-      "sha256": "c811fa0e268d6452861dfde233db12dad64f9901da584d24944316b3d4aa01b1",
+      "size": 172990434,
+      "sha256": "908959db40a8dec89baf9c87dd0f4cec84cc719f3767e85993ddc28cd3368810",
       "signature": {
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-29T22:39:05.512Z"
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
       }
     },
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64.dmg.blockmap",
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
       "kind": "file",
-      "size": 264011,
-      "sha256": "b872c36ff6af9cae27137abed68ee89ff8835210592145158cc04410f1a128a2",
+      "size": 177653,
+      "sha256": "c64c156d29c358c27c21a3c50588de9f3fefe7afa32b26e14e519cf15716a8a8",
       "signature": {
         "verified": false,
         "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-29T22:39:05.512Z"
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
       }
     },
     {
-      "path": "release/mac-arm64-signed/InsureMO DSH Desktop.app",
-      "kind": "directory",
-      "size": 738417750,
-      "sha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18",
-      "manifestSha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18",
-      "manifestEntries": 27781,
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
+      "kind": "file",
+      "size": 108043946,
+      "sha256": "359113dba008985496811e28fb857d5ecb5be2496306f309c1f29ffa8f43916a",
       "signature": {
-        "verified": true,
-        "method": "codesign-deep-strict",
-        "subject": "Apple Development: jophyzhang@126.com (W3P3ZMGWNW)",
-        "team": "ZG29WGT668",
-        "runtime": "26.4.0",
+        "verified": false,
+        "method": "unsigned-development",
         "notarized": false,
-        "verifiedAt": "2026-08-29T22:39:05.512Z"
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
+      }
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
+      "kind": "file",
+      "size": 114599,
+      "sha256": "1f0091072ac050b7512c2940d073f040586d6c15966ccf3c5e4a66728759b551",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
+      }
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
+      "kind": "file",
+      "size": 104738405,
+      "sha256": "d1937ff2cb7c6c680e2e788ddfdf52ce983288b4048150f6c25f07c4325396f5",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
+      }
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
+      "kind": "file",
+      "size": 110240,
+      "sha256": "55c987dc7a38cb6ef4d39d5ad79e70964ccc1667071b76e774250100d5ec3f6c",
+      "signature": {
+        "verified": false,
+        "method": "unsigned-development",
+        "notarized": false,
+        "verifiedAt": "2026-08-30T03:50:00.198Z"
       }
     }
   ],
   "evidence": {
     "executedCommands": [
-      {
-        "command": "pnpm check",
-        "platform": "darwin",
-        "ok": true,
-        "evidenceHash": "6552223b93659279b99845a67f2dc3857e0bc30551e3dbb79340dd13bfe18dde"
-      },
-      {
-        "command": "pnpm audit:runtime-pins -- --network",
-        "platform": "darwin",
-        "ok": true,
-        "evidenceHash": "4749f2e161b62515225b09ce9a3778453d40e94e1d939c6dc24027dddc5c6ae5"
-      },
       {
         "command": "pnpm build",
         "platform": "darwin",
@@ -126,64 +145,70 @@
         "evidenceHash": "702e948d947e109310cb2bf19c157b5bb8142b88c87e02ae87a7594c9b797893"
       },
       {
-        "command": "DSH_RUNTIME_ARCH=arm64 DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm build:e07:resources",
+        "command": "DSH_RUNTIME_ARCH=arm64 DSH_WORKBENCH_TGZ=/Users/junjie.zhang/dsh/icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz pnpm build:e07:resources",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "963edaeba5b020542c911c69fdaccc56c61ceeb2cf86857cbc7a7b453b843fb7"
+        "evidenceHash": "1a2c9e05782e396e878d845ff6b29baac1eb6871918811a5c545105c91a8fc9a"
       },
       {
-        "command": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir --arm64 --publish never",
+        "command": "DSH_DESKTOP_VARIANT=full CSC_IDENTITY_AUTO_DISCOVERY=false pnpm exec electron-builder --config scripts/electron-builder-config.mjs --mac zip dmg --arm64 --publish never",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "f828aceb8c788c37b9acfd139439f05e2145a87041df1b67d2faefda6ad92242"
+        "evidenceHash": "0f0a946ddd9af26d4ae78f1977b355a82c3d2d7e07f4f08f421860235f516225"
       },
       {
-        "command": "pnpm exec electron-builder --dir --arm64 --publish never (Apple Development signed dir)",
+        "command": "DSH_DESKTOP_VARIANT=thin CSC_IDENTITY_AUTO_DISCOVERY=false pnpm exec electron-builder --config scripts/electron-builder-config.mjs --mac zip dmg --arm64 --publish never",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "9dc40abe6696c2ec79f1e590827ccb4efad27b270bc65462c6b5014c8a5a4880"
+        "evidenceHash": "576f4a72d51143cccd51bcb6d6134fa9bb5134b66d31162ef95d820dde268443"
       },
       {
-        "command": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir --x64 --publish never",
+        "command": "node scripts/run-e07-electron-node-experiment.mjs 'release/mac-arm64-staged2/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop'",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "8cf49bbedc6bb79a114577a76fd27ecfe564655cc88a1dc4f7d2cd1004fa483d"
+        "evidenceHash": "3543df1b66937e8aeb92d9e407e858e5d661cbfa857c288af86c7539de1a1363"
       },
       {
-        "command": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip dmg --arm64 --publish never",
+        "command": "node scripts/run-e07-packaged-smoke.mjs 'release/mac-arm64-staged2/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop'",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "63e357949dc84163eedca10b46a04be461f4b0477951ff8882dd6cc4bd697229"
+        "evidenceHash": "d67fdf4fb2ec227f112076ff54bb4cb79e3d5d511cccc79364c6a49fef016b7f"
       },
       {
-        "command": "node scripts/run-e07-packaged-smoke.mjs",
+        "command": "node scripts/run-e07-thin-smoke.mjs 'release/mac-arm64-Thin/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop' packaging/e07/runtime",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "b937fc910c57f092a22cf80b3115de794be7363695c5e82d71872be7d7e56b65"
+        "evidenceHash": "1841a6245897164abaca6803f37eb37ecb10c4c7d9518a64d7a9f64689bf297e"
       },
       {
-        "command": "codesign --verify --deep --strict release/mac-arm64-signed/InsureMO DSH Desktop.app",
+        "command": "pnpm generate:e07:sbom",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "3f7ec587bccc130a6521632a68fa0dd1fe98f14f91ad67f5316ecc694582e0b7"
+        "evidenceHash": "a30bc4a728ff9640b0a31f7592ae5cd8217712505c9ed16ad8830b005e237ec8"
       },
       {
-        "command": "node scripts/generate-e07-sbom.mjs",
+        "command": "pnpm scan:e07:artifacts",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "e04cc8652df9915e62877d725248800001a994147e6998456011eaa653e63cda"
+        "evidenceHash": "2eeb01103e01461de14bab7c34158cdf1425daf964dbdbf8f2191b849afce06b"
       },
       {
-        "command": "node scripts/record-e07-artifacts.mjs",
+        "command": "pnpm record:e07:artifacts",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "56d7c7fa073120751b5a0dfe2c6adda20e1dc09fc25df6c1b7d065e323e6cac8"
+        "evidenceHash": "c6333e1b44a5d3c98730c788274213f5c9ee878775be4759186a5618a8cfea65"
       },
       {
-        "command": "node scripts/scan-e07-artifacts.mjs",
+        "command": "pnpm check",
         "platform": "darwin",
         "ok": true,
-        "evidenceHash": "88d259e1322111dc9e3387c61e73385918aed6a7b9764b05f44cb2e676ad3f24"
+        "evidenceHash": "6552223b93659279b99845a67f2dc3857e0bc30551e3dbb79340dd13bfe18dde"
+      },
+      {
+        "command": "node scripts/audit-runtime-pins.mjs",
+        "platform": "darwin",
+        "ok": true,
+        "evidenceHash": "7887277b4047c546291268722e066ed51d188082529d6ef45826b32cc45b5c8e"
       },
       {
         "command": "node scripts/record-e09-release-receipt.mjs",
@@ -201,15 +226,15 @@
       "pnpm smoke:e08:win"
     ],
     "resourceManifest": {
-      "entries": 27781,
-      "manifestSha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18",
+      "entries": 27775,
+      "manifestSha256": "6f27e3ad5dd82602d109bc402b5d9979903991adbc71213c2c0db28f0a7d13b9",
       "verified": true
     },
     "sbom": {
       "components": 534,
       "nativeFiles": 28,
       "unknownLicenses": 0,
-      "sha256": "fd2e065ddb8446281d7ff5343bac36ef57fe3debec426be0d6bdfe8167445089"
+      "sha256": "47db7b23519c118e83b37f811d1f81484c8fbdd1b070da29f171f13b781bdeda"
     },
     "scan": {
       "sourceMaps": 0,

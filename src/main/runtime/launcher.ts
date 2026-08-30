@@ -9,6 +9,8 @@ export interface RuntimeLauncherOptions {
   env?: Record<string, string>
   /** Optional real Node executable for packaged child_process.fork. */
   execPath?: string
+  /** Explicit opt-in for the Electron executable's run-as-Node mode. */
+  runAsNode?: boolean
 }
 
 export interface RuntimeChild {
@@ -24,6 +26,7 @@ export class RuntimeLauncher {
   static buildEnvironment(options: RuntimeLauncherOptions): Record<string, string> {
     const base = { ...options.env }
     delete base.ELECTRON_RUN_AS_NODE
+    if (options.runAsNode === true) base.ELECTRON_RUN_AS_NODE = '1'
     return {
       ...base,
       DSH_HOME: options.dshHome,
@@ -44,6 +47,7 @@ export class RuntimeLauncher {
       cwd: options.cwd,
       env: RuntimeLauncher.sanitizeEnvironment(RuntimeLauncher.buildEnvironment(options)),
       ...(options.execPath === undefined ? {} : { execPath: options.execPath }),
+      ...(options.runAsNode === true && options.execPath !== undefined ? { execArgv: ['--expose-internals'] } : {}),
       stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     })
     return {

@@ -7,74 +7,67 @@
   "asar": false,
   "artifacts": [
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64-mac.zip",
-      "size": 257389420,
-      "sha256": "654be8137c0063c19eb3842a94cdd15e589c8e6b9b0dd1210d903938d3338a97"
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
+      "size": 164447255,
+      "sha256": "ed14de2eb8eba4158625074c1875fbbe22afd55c14a297db6ab9157d05d02cf0"
     },
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64-mac.zip.blockmap",
-      "size": 265887,
-      "sha256": "386a5d50b78e188774dfd02e5ab8728b7fd10d16b3e2f74c7293082ca07c7513"
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
+      "size": 173739,
+      "sha256": "d0c3487804392531fa6e6512eb72f21b3979615a35cc28ba4ca049318f6b049a"
     },
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64.dmg",
-      "size": 252708362,
-      "sha256": "c811fa0e268d6452861dfde233db12dad64f9901da584d24944316b3d4aa01b1"
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
+      "size": 172990434,
+      "sha256": "908959db40a8dec89baf9c87dd0f4cec84cc719f3767e85993ddc28cd3368810"
     },
     {
-      "path": "release/InsureMO DSH Desktop-0.1.0-arm64.dmg.blockmap",
-      "size": 264011,
-      "sha256": "b872c36ff6af9cae27137abed68ee89ff8835210592145158cc04410f1a128a2"
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
+      "size": 177653,
+      "sha256": "c64c156d29c358c27c21a3c50588de9f3fefe7afa32b26e14e519cf15716a8a8"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
+      "size": 108043946,
+      "sha256": "359113dba008985496811e28fb857d5ecb5be2496306f309c1f29ffa8f43916a"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
+      "size": 114599,
+      "sha256": "1f0091072ac050b7512c2940d073f040586d6c15966ccf3c5e4a66728759b551"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
+      "size": 104738405,
+      "sha256": "d1937ff2cb7c6c680e2e788ddfdf52ce983288b4048150f6c25f07c4325396f5"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
+      "size": 110240,
+      "sha256": "55c987dc7a38cb6ef4d39d5ad79e70964ccc1667071b76e774250100d5ec3f6c"
     }
   ],
   "packagedDirectories": {
     "signedArm64": {
       "path": "release/mac-arm64-signed/InsureMO DSH Desktop.app",
-      "present": true,
-      "valid": true,
-      "identity": "Apple Development: jophyzhang@126.com (W3P3ZMGWNW)",
-      "teamIdentifier": "ZG29WGT668",
-      "runtimeVersion": "26.4.0",
-      "manifestSha256": "c8987f970224092db823a7ec4b67615c7007350b4df821513ba004c46b2dee18"
+      "present": false,
+      "valid": false,
+      "manifestSha256": null
     },
     "unsignedArm64": {
       "path": "release/mac-arm64/InsureMO DSH Desktop.app",
-      "present": true,
+      "present": false,
       "valid": false,
-      "identity": null,
-      "teamIdentifier": "not set",
-      "runtimeVersion": null,
-      "manifestSha256": "9ad987947479bc7142d88283102f3f6c0c7d75b9cf662bbd0fb3e2d29f9f0d46"
+      "manifestSha256": null
     },
     "unsignedX64": {
       "path": "release/mac/InsureMO DSH Desktop.app",
-      "present": true,
+      "present": false,
       "valid": false,
-      "identity": null,
-      "teamIdentifier": null,
-      "runtimeVersion": null,
-      "manifestSha256": "37070c6de7c9f049f456de498c98dbc28fc244a1ea6765cd9bb6f07e06919a31"
+      "manifestSha256": null
     }
   },
-  "runtime": {
-    "version": "0.1.0-rc.7",
-    "nodeVersion": "24.9.0",
-    "targetArch": "arm64",
-    "fileCount": 27781,
-    "workbenchSha256": "b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f",
-    "nodeFiles": [
-      {
-        "path": "node/darwin-arm64/bin/node",
-        "sha256": "e99f84469c1b81f5b0c0555f2fe1c1d73100d9ddb0a3bd9409e2d67461b9c98c",
-        "size": 116679664
-      },
-      {
-        "path": "node/darwin-x64/bin/node",
-        "sha256": "a41355a899661761001345e7c19750e2cfbbc8ec44d605fdf1d4dab1b858f1e0",
-        "size": 119687664
-      }
-    ]
-  },
+  "runtime": null,
   "signing": {
     "unsignedDevArtifactsAllowed": true,
     "notarization": "skipped without notarization credentials",

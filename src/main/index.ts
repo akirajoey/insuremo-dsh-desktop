@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme } from 'electron'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import {
@@ -20,10 +20,19 @@ import { HarnessManager, readRuntimePin } from './app/harness-manager.ts'
 import { DiagnosticsService, type DiagnosticsContext } from './app/diagnostics.ts'
 import { installApplicationMenu, dockIconPath } from './app/menu.ts'
 import { resolveNodePath, resolvePnpmEntry } from './app/runtime-paths.ts'
-import { verifyPackagedRuntime, type RuntimeResourceLayout } from './app/runtime-resources.ts'
+import {
+  readPackagedVariant,
+  runtimeStatus,
+  verifyPackagedRuntime,
+  verifyRuntimeRoot,
+  writeRuntimeSourceConfig,
+  type PackagedVariant,
+  type RuntimeResourceLayout,
+  type RuntimeSourceStatus,
+} from './app/runtime-resources.ts'
 import { UpgradeManager } from './upgrade/upgrade-manager.ts'
+import { captureDesktopEnvironment } from './app/windows-environment.ts'
 
-const hasSingleInstance = app.requestSingleInstanceLock()
 const safeModeArg = process.argv.includes('--safe-mode') || process.env.DSH_DESKTOP_SAFE_MODE === '1'
 
 function configureUserData(): void {
@@ -62,13 +71,17 @@ interface DesktopServices {
   pnpmEntry: string
   nodePath: string
   supervisorPath?: string
+  environment: Record<string, string>
+  runAsNode: boolean
 }
 
-function createServices(runtime?: RuntimeResourceLayout): DesktopServices {
+function createServices(runtime: RuntimeResourceLayout | undefined, allowMissingRuntime = false): DesktopServices {
   const userData = app.getPath('userData')
   const dshHome = join(userData, 'harness')
-  const pnpmEntry = runtime?.pnpmEntry ?? resolvePnpmEntry()
-  const nodePath = runtime?.nodePath ?? resolveNodePath()
+  const environment = captureDesktopEnvironment()
+  const runAsNode = runtime?.nodeMode === 'electron-run-as-node' || (app.isPackaged && process.platform === 'darwin' && environment.DSH_DESKTOP_EXPERIMENT_ELECTRON_NODE === '1')
+  const pnpmEntry = runtime?.pnpmEntry ?? (allowMissingRuntime ? '' : resolvePnpmEntry(environment))
+  const nodePath = runtime?.nodePath ?? (allowMissingRuntime ? process.execPath : resolveNodePath(environment))
   const pm = new ProfileManager({
     userData,
     dshHome,
@@ -77,21 +90,28 @@ function createServices(runtime?: RuntimeResourceLayout): DesktopServices {
     nodePath,
     workbenchTgzPath: runtime?.workbenchTgz ?? '',
     workbenchSha256: runtime?.workbenchSha256 ?? '',
+    runAsNode,
   })
   const plugins = new PluginService({
     profileManager: pm,
     capabilityDir: join(userData, 'desktop-state', 'plugin-capabilities'),
     pnpmEntry,
     nodePath,
+    environment,
+    runAsNode,
     workbenchName: '@icomposer/workbench',
   })
-  return { pm, plugins, pnpmEntry, nodePath, supervisorPath: runtime?.supervisorPath }
+  return { pm, plugins, pnpmEntry, nodePath, supervisorPath: runtime?.supervisorPath, environment, runAsNode }
 }
 
 let quitting = false
 
 function bootstrap(): void {
   configureUserData()
+  if (!app.requestSingleInstanceLock()) {
+    app.quit()
+    return
+  }
   app.setName('InsureMO DSH Desktop')
   const userData = app.getPath('userData')
   // Follow the system theme; the harness chrome itself stays its own brand.
@@ -107,31 +127,56 @@ function bootstrap(): void {
     if (existsSync(icon) && app.dock !== undefined) app.dock.setIcon(icon)
   }
   const testOpenPluginManager = process.env.DSH_DESKTOP_TEST_OPEN_PLUGIN_MANAGER === '1'
-  const runtime = app.isPackaged ? verifyPackagedRuntime() : undefined
-  const { pm, plugins, pnpmEntry, nodePath, supervisorPath } = createServices(runtime)
-  const upgrades = new UpgradeManager({ userData, appPath: app.getAppPath(), profileManager: pm })
-  upgrades.validateCompatibility()
-  const testPluginTgz = process.env.DSH_DESKTOP_TEST_PLUGIN_TGZ
-  if (process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined && testPluginTgz !== undefined && testPluginTgz !== '') {
-    plugins.registerCapability('packaged-smoke', testPluginTgz)
+  let runtimeVariant: PackagedVariant = 'full'
+  let runtime: RuntimeResourceLayout | undefined
+  let runtimeError: unknown
+  if (app.isPackaged) {
+    try {
+      runtimeVariant = readPackagedVariant()
+      runtime = verifyPackagedRuntime()
+    } catch (error) {
+      runtimeError = error
+    }
   }
+  let services = createServices(runtime, runtimeError !== undefined)
+  let { pm, plugins, pnpmEntry, nodePath, supervisorPath, environment, runAsNode } = services
+  let runtimeState: RuntimeSourceStatus = runtimeStatus(runtimeVariant, runtime, runtimeError)
+  const testPluginTgz = process.env.DSH_DESKTOP_TEST_PLUGIN_TGZ
+  const registerTestPlugin = (): void => {
+    if (process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined && testPluginTgz !== undefined && testPluginTgz !== '') {
+      plugins.registerCapability('packaged-smoke', testPluginTgz)
+    }
+  }
+  registerTestPlugin()
+  let upgrades = new UpgradeManager({ userData, appPath: app.getAppPath(), profileManager: pm })
+  upgrades.validateCompatibility()
   const testAutoQuitMs = Number(process.env.DSH_DESKTOP_TEST_AUTO_QUIT_AFTER_MS)
   if (process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined && Number.isFinite(testAutoQuitMs) && testAutoQuitMs > 0) {
     setTimeout(() => app.quit(), testAutoQuitMs)
   }
-  const harness = new HarnessManager({
+  const makeHarness = (): HarnessManager => new HarnessManager({
     userData,
     profileManager: pm,
     runtimePin: readRuntimePin(join(app.getAppPath())),
     pnpmEntry,
     nodePath,
+    environment,
+    runAsNode,
     forkMode: app.isPackaged ? 'fork' : 'utility',
     execPath: app.isPackaged ? nodePath : undefined,
     supervisorPath,
+    runtimeRoot: runtime?.root,
   })
+  let harness = makeHarness()
   const windowState = new WindowStateStore(userData)
-  const diagnostics = new DiagnosticsService(pm, userData)
-  let lastContext: DiagnosticsContext = { mode: safeModeArg ? 'safe' : 'normal', phase: 'starting', message: '', stderrTail: '', profileHome: safeModeArg ? join(userData, 'safe-runtime/harness') : join(userData, 'harness') }
+  let diagnostics = new DiagnosticsService(pm, userData, () => runtimeState)
+  let lastContext: DiagnosticsContext = {
+    mode: safeModeArg ? 'safe' : 'normal',
+    phase: runtimeError === undefined ? 'starting' : 'failed',
+    message: runtimeError instanceof Error ? runtimeError.message : runtimeError === undefined ? '' : String(runtimeError),
+    stderrTail: '',
+    profileHome: safeModeArg ? join(userData, 'safe-runtime/harness') : join(userData, 'harness'),
+  }
 
   const harnessWindows = new Set<Electron.BrowserWindow>()
   const closeHarnessWindows = (): void => {
@@ -157,6 +202,37 @@ function bootstrap(): void {
     window.focus()
   }
 
+  const selectExternalRuntime = async (): Promise<{ ok: boolean; message: string }> => {
+    if (runtimeVariant !== 'thin') return { ok: false, message: 'runtime selection is available for Thin builds only' }
+    const picked = await dialog.showOpenDialog({
+      title: 'Select DSH Runtime…',
+      properties: ['openDirectory'],
+    })
+    if (picked.canceled || picked.filePaths[0] === undefined) return { ok: false, message: 'cancelled' }
+    try {
+      const candidate = verifyRuntimeRoot(picked.filePaths[0], 'external', 'thin')
+      writeRuntimeSourceConfig(userData, candidate.root)
+      const nextServices = createServices(candidate)
+      await harness.stop()
+      services = nextServices
+      ;({ pm, plugins, pnpmEntry, nodePath, supervisorPath, environment, runAsNode } = services)
+      runtime = candidate
+      runtimeError = undefined
+      runtimeState = runtimeStatus(runtimeVariant, runtime)
+      diagnostics = new DiagnosticsService(pm, userData, () => runtimeState)
+      upgrades = new UpgradeManager({ userData, appPath: app.getAppPath(), profileManager: pm })
+      upgrades.validateCompatibility()
+      registerTestPlugin()
+      const boot = await bootAndShow('normal')
+      return { ok: boot.ok, message: boot.message }
+    } catch (error) {
+      runtimeError = error
+      runtimeState = runtimeStatus(runtimeVariant, undefined, error)
+      lastContext = { ...lastContext, phase: 'failed', message: error instanceof Error ? error.message : String(error), stderrTail: '' }
+      return { ok: false, message: 'runtime rejected; see diagnostics' }
+    }
+  }
+
   const failureDeps = (): FailureWindowDeps => ({
     harness,
     plugins,
@@ -166,10 +242,17 @@ function bootstrap(): void {
     lastContext: () => lastContext,
     onRestart: () => bootAndShow(harness.mode),
     onSafeMode: () => bootAndShow('safe'),
+    onSelectRuntime: selectExternalRuntime,
   })
 
   const bootAndShow = async (mode: 'normal' | 'safe'): Promise<{ ok: boolean; message: string }> => {
     closeHarnessWindows()
+    if (runtimeError !== undefined) {
+      const message = runtimeError instanceof Error ? runtimeError.message : String(runtimeError)
+      lastContext = { ...lastContext, mode, phase: 'failed', message, stderrTail: '' }
+      createFailureWindow(failureDeps())
+      return { ok: false, message: 'runtime unavailable' }
+    }
     lastContext = { mode, phase: 'starting', message: '', stderrTail: '', profileHome: harness.homeFor(mode) }
     let snapshot: Awaited<ReturnType<HarnessManager['start']>>
     try {
@@ -211,7 +294,8 @@ function bootstrap(): void {
       onRestart: () => { void bootAndShow(harness.mode) },
       onSafeMode: () => { void bootAndShow('safe') },
     })
-    void bootAndShow(safeModeArg ? 'safe' : 'normal')
+    if (runtimeError !== undefined) createFailureWindow(failureDeps())
+    else void bootAndShow(safeModeArg ? 'safe' : 'normal')
     app.on('activate', () => {
       if (harness.snapshot().url !== undefined) openHarness(harness.mode)
       else if (!harness.running) void bootAndShow(harness.mode)
@@ -235,8 +319,4 @@ function bootstrap(): void {
   })
 }
 
-if (!hasSingleInstance) {
-  app.quit()
-} else {
-  bootstrap()
-}
+bootstrap()

@@ -73,6 +73,7 @@ const sbom = {
     harness: '@deepseek-ai/dsh',
     version: manifest.runtimeVersion,
     nodeVersion: manifest.nodeVersion,
+    nodeMode: manifest.nodeMode ?? 'bundled',
     targetArch: manifest.runtimeArch,
     resourceManifestSha256: sha256(manifestPath),
     resourceFileCount: manifest.files.length,

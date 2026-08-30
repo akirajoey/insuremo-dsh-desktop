@@ -46,7 +46,9 @@ export function createHarnessWindow(options: HarnessWindowOptions): BrowserWindo
   window.webContents.on('will-navigate', (event, targetUrl) => {
     if (!targetUrl.startsWith(`${allowedOrigin}/`)) event.preventDefault()
   })
-  window.once('ready-to-show', () => window.show())
+  window.once('ready-to-show', () => {
+    if (process.env.DSH_DESKTOP_TEST_HEADLESS !== '1') window.show()
+  })
   window.on('close', () => {
     options.windowState.save(HARNESS_WINDOW, { ...window.getBounds(), maximized: window.isMaximized() })
   })

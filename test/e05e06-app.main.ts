@@ -162,6 +162,7 @@ async function run(): Promise<void> {
         const snapshot = await harness.start('safe')
         return { ok: snapshot.phase === 'ready', message: snapshot.message }
       },
+      onSelectRuntime: async () => ({ ok: false, message: 'not available in this probe' }),
     })
     await new Promise(r => setTimeout(r, 1_200))
     const payload = await failureWindow.webContents.executeJavaScript('window.insuremoFailure.diagnostics()') as { profile: { bundles: string[]; missingModules: string[] }; message: string; stderrTail?: string; logTail?: string }

@@ -44,4 +44,11 @@ describe('runtime environment building', () => {
     const clean = RuntimeLauncher.sanitizeEnvironment({ A: '1', B: undefined as unknown as string })
     expect(clean).toEqual({ A: '1' })
   })
+
+  it('sets Electron run-as-Node only for an explicit experiment opt-in', () => {
+    const normal = RuntimeLauncher.buildEnvironment({ launchId: 'normal', dshHome: '/home', wrapperPath: '/w', env: { ELECTRON_RUN_AS_NODE: '1' } })
+    const experimental = RuntimeLauncher.buildEnvironment({ launchId: 'experiment', dshHome: '/home', wrapperPath: '/w', env: {}, runAsNode: true })
+    expect(normal.ELECTRON_RUN_AS_NODE).toBeUndefined()
+    expect(experimental.ELECTRON_RUN_AS_NODE).toBe('1')
+  })
 })

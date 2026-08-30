@@ -9,6 +9,7 @@ body { margin: 0; }
 .fx { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
 .fx h1 { margin: 0 0 4px; font-size: 24px; }
 .fx-sub { color: #53627c; margin: 0 0 20px; }
+.fx-runtime-state { margin: 0 0 10px; font-size: 13px; }
 
 .fx-card { background: #fff; border: 1px solid #e3e8f0; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
 .fx-card h2 { margin: 0 0 10px; font-size: 14px; color: #33415c; text-transform: uppercase; letter-spacing: 0.04em; }

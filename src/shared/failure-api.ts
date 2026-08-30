@@ -10,8 +10,16 @@ export interface FailureProfileDiagnostics {
   lockfileParses: boolean | null
 }
 
+export interface FailureRuntimeDiagnostics {
+  variant: 'full' | 'thin'
+  source: 'embedded' | 'external' | 'unavailable'
+  rootName: string | null
+  error: string | null
+}
+
 export interface FailureDiagnostics {
   mode: 'normal' | 'safe'
+  runtime: FailureRuntimeDiagnostics
   phase: string
   message: string
   stderrTail: string
@@ -39,6 +47,7 @@ export interface FailureApi {
   rollback(): Promise<FailureActionResult>
   rebuild(): Promise<FailureActionResult>
   removePlugin(name: string): Promise<FailureActionResult>
+  selectRuntime(): Promise<FailureActionResult>
   openLogs(): Promise<void>
 }
 

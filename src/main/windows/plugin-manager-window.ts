@@ -134,7 +134,9 @@ export function createPluginManagerWindow(service: PluginService): BrowserWindow
   window.webContents.on('will-navigate', (event, targetUrl) => {
     if (!isExactUrl(targetUrl, url)) event.preventDefault()
   })
-  window.once('ready-to-show', () => window.show())
+  window.once('ready-to-show', () => {
+    if (process.env.DSH_DESKTOP_TEST_HEADLESS !== '1') window.show()
+  })
   window.on('closed', () => {
     if (pluginWindow === window) pluginWindow = undefined
   })

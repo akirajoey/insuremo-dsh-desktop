@@ -30,6 +30,7 @@ export interface FailureWindowDeps {
   lastContext: () => DiagnosticsContext
   onRestart: () => Promise<{ ok: boolean; message: string }>
   onSafeMode: () => Promise<{ ok: boolean; message: string }>
+  onSelectRuntime: () => Promise<{ ok: boolean; message: string }>
 }
 
 function authorize(event: Electron.IpcMainInvokeEvent): boolean {
@@ -103,6 +104,10 @@ function registerFailureIpc(deps: FailureWindowDeps): void {
     }
     return deps.plugins.runOperation('remove', name)
   })
+  ipcMain.handle('failure:select-runtime', async (event) => {
+    if (!authorize(event)) throw new Error('forbidden')
+    return deps.onSelectRuntime()
+  })
   ipcMain.handle('failure:open-logs', (event) => {
     if (!authorize(event)) throw new Error('forbidden')
     void shell.openPath(join(deps.userData, 'logs'))
@@ -146,7 +151,9 @@ export function createFailureWindow(deps: FailureWindowDeps): BrowserWindow {
   window.webContents.on('will-navigate', (event, targetUrl) => {
     if (!isExactUrl(targetUrl, url)) event.preventDefault()
   })
-  window.once('ready-to-show', () => window.show())
+  window.once('ready-to-show', () => {
+    if (process.env.DSH_DESKTOP_TEST_HEADLESS !== '1') window.show()
+  })
   window.on('closed', () => {
     if (failureWindow === window) failureWindow = undefined
   })

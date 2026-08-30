@@ -1,6 +1,8 @@
 import type { FailureDiagnostics } from '../../shared/failure-api.ts'
+import type { RuntimeSourceStatus } from './runtime-resources.ts'
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { homedir, tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { parse as parseYaml } from 'yaml'
 import { logTail, harnessLogPath } from './logs.ts'
@@ -19,10 +21,12 @@ export interface DiagnosticsContext {
 export class DiagnosticsService {
   private readonly pm: ProfileManager
   private readonly userData: string
+  private readonly runtimeStatus: () => RuntimeSourceStatus
 
-  constructor(pm: ProfileManager, userData: string) {
+  constructor(pm: ProfileManager, userData: string, runtimeStatus?: () => RuntimeSourceStatus) {
     this.pm = pm
     this.userData = userData
+    this.runtimeStatus = runtimeStatus ?? (() => ({ variant: 'full', source: 'unavailable', rootName: null, error: null }))
   }
 
   collect(context: DiagnosticsContext): FailureDiagnostics {
@@ -57,8 +61,13 @@ export class DiagnosticsService {
       }
     }
     const bases = [this.pm.userData, this.pm.dshHome]
+    const runtime = this.runtimeStatus()
     return {
       mode: context.mode,
+      runtime: {
+        ...runtime,
+        error: runtime.error === null ? null : sanitizeErrorMessage(runtime.error, [...bases, homedir(), tmpdir()]),
+      },
       phase: context.phase,
       message: sanitizeErrorMessage(context.message, bases),
       stderrTail: sanitizeErrorMessage(context.stderrTail, bases),
