@@ -7,7 +7,7 @@
     "nodeVersion": "24.18.1",
     "nodeMode": "electron-run-as-node",
     "targetArch": "arm64",
-    "resourceManifestSha256": "6f27e3ad5dd82602d109bc402b5d9979903991adbc71213c2c0db28f0a7d13b9",
+    "resourceManifestSha256": "45ab2e485f90fcd9978e3b74c4dc268d572567c8d885f8b382d3db5bc31e97f5",
     "resourceFileCount": 27775,
     "workbenchSha256": "b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f"
   },

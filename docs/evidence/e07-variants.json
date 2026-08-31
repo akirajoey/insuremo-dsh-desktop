@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "task": "TASK-071/TASK-072",
+  "task": "TASK-071/TASK-072/TASK-073",
   "platform": "darwin",
   "arch": "arm64",
   "electron": "43.4.0",
@@ -17,26 +17,26 @@
       "artifacts": [
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
-          "size": 177092515,
-          "sha256": "3bb2099f98ebd069aad666972e3465cd9a7c57e36ef5ce494f92d448b679abff"
+          "size": 179325825,
+          "sha256": "eee1f6aef922895d7e6d358186bfe9afa47c868a7fcbe307878a3a2ce560d02f"
         },
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
-          "size": 181048,
-          "sha256": "3ec57318d9a40ef9e82073cd0807dee3620bc08a204724d005c94e2a2d28f89f"
+          "size": 183172,
+          "sha256": "d8d919d6363383ebd718b40c72771d5ab40725c7d1523e149fb10b8b709a68cf"
         },
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
-          "size": 170712184,
-          "sha256": "79eebae1f650f4b9e96cb8fe4cea8420efc154997a92a9f141512f4c1a0aa517"
+          "size": 173588144,
+          "sha256": "dec69e90d0deccda1d31d301a464d76812128a4ae5296ada3681e998fbad3d38"
         },
         {
           "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
-          "size": 179562,
-          "sha256": "e06440ff376acf79b7fbe8e3849a90c0d5a84192b7e26c1b0057cc3b9139efc0"
+          "size": 179990,
+          "sha256": "f21f37d64df568c389056b972104f8b86438811966931c2b7279d0b74d877849"
         }
       ],
-      "installedAppBytes": 520372224,
+      "installedAppBytes": 449353196,
       "hiddenPackagedSmoke": {
         "ok": true,
         "settings": {
@@ -78,36 +78,76 @@
         "cFBundleIconFile": "icon.icns",
         "iconIcnsPresent": true,
         "iconIcnsLargestRep": "icon_512x512@2x.png (1024x1024)",
-        "iconIcnsLargestRepSha256": "2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6",
+        "iconIcnsLargestRepSha256": "0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b",
         "iconIcnsLargestRepMatchesDesignDerivative": true,
-        "verification": "iconutil -c iconset extraction of the packaged app icon.icns"
-      }
+        "verification": "iconutil -c iconset extraction of the packaged app icon.icns",
+        "iconIcnsRepByteEqualBuildIcon": true,
+        "iconAlphaSamples": {
+          "packagedRepCornersAlpha": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "packagedRep200x20Alpha": 0,
+          "packagedRep480x20Alpha": 255,
+          "packagedRepCenterAlpha": 255,
+          "sourceCornersAlpha": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sourceAxisEdge627x10Alpha": 255,
+          "sourceTopNoCornerCut200x20Alpha": 0,
+          "sourceTopFrame480x20Alpha": 255,
+          "sourceFeather": [
+            {
+              "at": "627,7",
+              "alpha": 42
+            },
+            {
+              "at": "627,8",
+              "alpha": 127
+            },
+            {
+              "at": "627,9",
+              "alpha": 212
+            },
+            {
+              "at": "627,10",
+              "alpha": 255
+            }
+          ]
+        }
+      },
+      "installedAppBytesMethod": "logical file bytes of the app bundle expanded from the release zip"
     },
     "thin": {
       "description": "No embedded runtime; strict external runtime root with Recovery picker",
       "artifacts": [
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
-          "size": 108840486,
-          "sha256": "55a2f9ea0ce16806193a32e04b428789ab977e4fd76fa27ad6a09f0151166d4b"
+          "size": 109387086,
+          "sha256": "e57fe52a905f534220b3eca30cc46d869484230858ffdf422caf93793da97efd"
         },
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
-          "size": 112937,
-          "sha256": "ab83a901b2af8e6126ced53ab593d321de4c20f4dfe59cb6ddb1f2cd85c60b64"
+          "size": 114977,
+          "sha256": "f73378ff42fae5f0535e1753d449e6bb8c690b11ac52395787003ef3498c48ab"
         },
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
-          "size": 114615439,
-          "sha256": "32aa0b510b58a746f5539d449b63209f34d0a77fa2f0ad009dff030fb6fd193c"
+          "size": 115472064,
+          "sha256": "5725acfae7e428c58b121035b7a096097a4ee62e4d95e8e1f6fa2140662babfb"
         },
         {
           "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
-          "size": 120069,
-          "sha256": "0cfde86c3f88327faf7d9e14e403e998b1ab1c72ae6cacc8322d40ffeb88748e"
+          "size": 119955,
+          "sha256": "2e5e335ec3a4ff38ac22db3d9960a53efe67c342b92db5f7d9218edde6c16ee2"
         }
       ],
-      "installedAppBytes": 246968320,
+      "installedAppBytes": 247210616,
       "hiddenPackagedSmoke": {
         "ok": true,
         "invalidRuntimeRecoveryShown": true,
@@ -122,7 +162,8 @@
           },
           "homeDshUnchanged": true,
           "orphanWrappers": 0
-        }
+        },
+        "consecutiveRuns": "3/3 PASS after cold-start determinism fix (autoQuit 60s, 20s text window, deterministic terminate)"
       },
       "signature": {
         "status": "unsigned",
@@ -141,10 +182,50 @@
         "cFBundleIconFile": "icon.icns",
         "iconIcnsPresent": true,
         "iconIcnsLargestRep": "icon_512x512@2x.png (1024x1024)",
-        "iconIcnsLargestRepSha256": "2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6",
+        "iconIcnsLargestRepSha256": "0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b",
         "iconIcnsLargestRepMatchesDesignDerivative": true,
-        "verification": "iconutil -c iconset extraction of the packaged app icon.icns"
-      }
+        "verification": "iconutil -c iconset extraction of the packaged app icon.icns",
+        "iconIcnsRepByteEqualBuildIcon": true,
+        "iconAlphaSamples": {
+          "packagedRepCornersAlpha": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "packagedRep200x20Alpha": 0,
+          "packagedRep480x20Alpha": 255,
+          "packagedRepCenterAlpha": 255,
+          "sourceCornersAlpha": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sourceAxisEdge627x10Alpha": 255,
+          "sourceTopNoCornerCut200x20Alpha": 0,
+          "sourceTopFrame480x20Alpha": 255,
+          "sourceFeather": [
+            {
+              "at": "627,7",
+              "alpha": 42
+            },
+            {
+              "at": "627,8",
+              "alpha": 127
+            },
+            {
+              "at": "627,9",
+              "alpha": 212
+            },
+            {
+              "at": "627,10",
+              "alpha": 255
+            }
+          ]
+        }
+      },
+      "installedAppBytesMethod": "logical file bytes of the app bundle expanded from the release zip"
     }
   },
   "baselineComparison": {
@@ -158,14 +239,19 @@
   "icon": {
     "source": {
       "path": "design/insuremo-dsh-glass-icon-v2-imo.png",
-      "sha256": "6fb21082817bfcd7cfffe57e791bd4e11467561db71a2d7a17d772fd971188c7",
+      "sha256": "aa84a60fbfcdc99eb69c8b458d1952d1cb2b3db7f51dc8659d8dfbe88b058b8d",
       "width": 1254,
-      "height": 1254
+      "height": 1254,
+      "colorType": "8-bit RGBA with transparent outer alpha mask",
+      "opaqueArchive": {
+        "path": "design/archive/insuremo-dsh-glass-icon-v2-imo-opaque-rgb.png",
+        "sha256": "6fb21082817bfcd7cfffe57e791bd4e11467561db71a2d7a17d772fd971188c7"
+      }
     },
     "buildPng": {
       "path": "build/icon.png",
       "size": 1024,
-      "sha256": "2bf50b3d37f7dbe6b0b24b8a69aee4e9da51bf95f9bb38dc58cef55dc1b3d4b6",
+      "sha256": "0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b",
       "from": "design/icons/icon-1024.png"
     },
     "buildIco": {
@@ -179,9 +265,21 @@
         128,
         256
       ],
-      "widthByte256": 0
+      "widthByte256": 0,
+      "rgbaEntries": true
     },
     "derivativesPinnedIn": "scripts/gen-icon.mjs (ICON_DERIVATIVE_SHA256); generation command recorded in design/README.md",
-    "macIconPath": "electron-builder icon.icns from build/icon.png"
-  }
+    "macIconPath": "electron-builder icon.icns from build/icon.png",
+    "alphaMask": {
+      "model": "4th-order superellipse",
+      "center": "(626.5, 626.5) pixel centers",
+      "radii": 616.5,
+      "insetPx": 10,
+      "featherPx": 3,
+      "formula": "alpha = round(clamp((d + 3) / 3, 0, 1) * 255)",
+      "generator": "scripts/apply-icon-alpha.mjs (one-time, never run by the build)"
+    }
+  },
+  "recordedAt": "2026-08-31T03:06:26.355Z",
+  "reRecordNote": "Re-recorded for TASK-073 transparent squircle alpha icon; artifacts rebuilt and re-verified (no repackaging after recording)."
 }

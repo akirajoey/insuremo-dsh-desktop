@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { quoteWindowsArgument } from '../src/main/runtime/windows-supervisor-launcher'
+import { textMatchesDevPathNeedle } from '../scripts/scan-dev-path-needles.mjs'
 
 const root = resolve(import.meta.dirname, '..')
 const text = (path: string): string => readFileSync(resolve(root, path), 'utf8')
@@ -48,6 +49,19 @@ describe('E08 Windows packaging contract', () => {
     const measure = text('scripts/measure-e07-runtime-size.mjs')
     expect(measure).toContain("from './resolve-pnpm-entry.mjs'")
     expect(measure).not.toContain('/opt/homebrew')
+  })
+
+  it('allows only the complete standard Homebrew PATH fragments in artifact scans', () => {
+    expect(textMatchesDevPathNeedle('/opt/homebrew/bin:/opt/homebrew/sbin:/usr/bin:/bin', '/opt/homebrew')).toBe(false)
+    expect(textMatchesDevPathNeedle('const p = ["/opt/homebrew/bin", "/opt/homebrew/sbin"]', '/opt/homebrew')).toBe(false)
+    expect(textMatchesDevPathNeedle('/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs', '/opt/homebrew')).toBe(true)
+    expect(textMatchesDevPathNeedle('/opt/homebrew/bin-custom', '/opt/homebrew')).toBe(true)
+    expect(textMatchesDevPathNeedle('/opt/homebrew/sbin-custom', '/opt/homebrew')).toBe(true)
+    expect(textMatchesDevPathNeedle('/opt/homebrew/binary-tool', '/opt/homebrew')).toBe(true)
+    expect(textMatchesDevPathNeedle('/opt/homebrew', '/opt/homebrew')).toBe(true)
+    expect(textMatchesDevPathNeedle('/opt/homebrew/lib', '/opt/homebrew')).toBe(true)
+    expect(textMatchesDevPathNeedle('recorded /Users/junjie.zhang/dsh path', '/Users/junjie.zhang')).toBe(true)
+    expect(textMatchesDevPathNeedle('clean text', '/Users/junjie.zhang')).toBe(false)
   })
 
   it('uses CommandLineToArgvW-compatible quoting for Windows paths', () => {

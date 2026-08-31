@@ -10,7 +10,10 @@ const appPath = resolve(process.argv[2] ?? join(root, 'release/mac-arm64-Thin/ma
 const runtimeRoot = resolve(process.argv[3] ?? join(root, 'packaging/e07/runtime'))
 const pluginTgz = process.env.DSH_TEST_PLUGIN_TGZ ?? ensureTestPluginTgz().path
 const invalidPort = 9251
-const autoQuitMs = process.env.DSH_TEST_AUTO_QUIT_AFTER_MS ?? '20000'
+// Cold-start margin: a freshly written app bundle can take >20s to boot headless
+// (macOS scans the new bundle), which previously outran the 20s auto-quit and
+// surfaced as 'Thin invalid runtime did not show Recovery picker'.
+const autoQuitMs = process.env.DSH_TEST_AUTO_QUIT_AFTER_MS ?? '60000'
 
 if (!existsSync(appPath)) throw new Error(`Thin app missing: ${appPath}`)
 if (!existsSync(runtimeRoot)) throw new Error(`external runtime missing: ${runtimeRoot}`)
@@ -56,6 +59,20 @@ async function evaluate(target, expression) {
   return result.result?.result?.value
 }
 
+const terminate = async child => {
+  if (child.exitCode === null) child.kill('SIGTERM')
+  await new Promise(resolvePromise => {
+    const timer = setTimeout(() => {
+      if (child.exitCode === null) child.kill('SIGKILL')
+      resolvePromise()
+    }, 5_000)
+    child.once('exit', () => {
+      clearTimeout(timer)
+      resolvePromise()
+    })
+  })
+}
+
 async function invalidRecoveryProbe() {
   const userData = mkdtempSync(join(tmpdir(), 'e07-thin-invalid-'))
   const badRoot = join(userData, 'bad-runtime')
@@ -73,7 +90,7 @@ async function invalidRecoveryProbe() {
   try {
     const target = await waitTarget(invalidPort, value => value.type === 'page' && typeof value.url === 'string' && value.url.includes('/failure/index.html'))
     let text
-    const deadline = Date.now() + 10_000
+    const deadline = Date.now() + 20_000
     while (text === undefined && Date.now() < deadline) {
       try { text = await evaluate(target, 'document.body?.innerText') } catch { /* page is still loading */ }
       if (text === undefined) await sleep(150)
@@ -82,9 +99,7 @@ async function invalidRecoveryProbe() {
     if (text.includes(badRoot)) throw new Error('Recovery page exposed the absolute runtime path')
     return { ok: true, recovery: true, pathHidden: true }
   } finally {
-    if (child.exitCode === null) child.kill('SIGTERM')
-    await sleep(1_000)
-    if (child.exitCode === null) child.kill('SIGKILL')
+    await terminate(child)
     rmSync(userData, { recursive: true, force: true })
   }
 }

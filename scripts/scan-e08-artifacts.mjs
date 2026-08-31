@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, lstatSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { textMatchesDevPathNeedle } from './scan-dev-path-needles.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const requested = process.argv.slice(2).map(path => resolve(root, path))
@@ -28,7 +29,7 @@ function visit(current) {
     if (bytes.includes(0)) continue
     const text = bytes.toString('utf8')
     for (const needle of ['/Users/', '/opt/homebrew', 'icomposer-workbench-plan', '\\Users\\']) {
-      if (text.includes(needle)) findings.absoluteDevPaths.push({ path: relativePath, needle })
+      if (textMatchesDevPathNeedle(text, needle)) findings.absoluteDevPaths.push({ path: relativePath, needle })
     }
     if (/(?:^|\s)sk-[A-Za-z0-9]{20,}|Bearer\s+[A-Za-z0-9._-]{20,}|ghp_[A-Za-z0-9]{20,}/u.test(text)) findings.tokenLike.push(relativePath)
   }

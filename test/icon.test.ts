@@ -10,6 +10,8 @@ import {
   ICON_SOURCE_SIZE,
   ICO_LADDER,
   assembleIco,
+  pngAlphaAt,
+  pngInfo,
   pngSize,
   verifyDesignAssets,
 } from '../scripts/gen-icon.mjs'
@@ -20,7 +22,16 @@ describe('application icon contract', () => {
   it('pins the design source and every committed derivative', () => {
     const source = readFileSync(resolve(root, ICON_SOURCE))
     expect(createHash('sha256').update(source).digest('hex')).toBe(ICON_SOURCE_SHA256)
+    expect(pngInfo(source)).toMatchObject({ bitDepth: 8, colorType: 6, interlace: 0 })
     expect(pngSize(source)).toEqual({ width: ICON_SOURCE_SIZE, height: ICON_SOURCE_SIZE })
+    const sourceCorners = [[0, 0], [ICON_SOURCE_SIZE - 1, 0], [0, ICON_SOURCE_SIZE - 1], [ICON_SOURCE_SIZE - 1, ICON_SOURCE_SIZE - 1]]
+    expect(sourceCorners.map(([x, y]) => pngAlphaAt(source, x, y))).toEqual([0, 0, 0, 0])
+    expect(pngAlphaAt(source, 627, 7)).toBeGreaterThan(0)
+    expect(pngAlphaAt(source, 627, 8)).toBeLessThan(255)
+    expect(pngAlphaAt(source, 627, 10)).toBe(255)
+    expect(pngAlphaAt(source, 200, 20)).toBe(0)
+    expect(pngAlphaAt(source, 480, 20)).toBe(255)
+    expect(pngAlphaAt(source, 627, 627)).toBe(255)
     const { ladder } = verifyDesignAssets()
     expect(Object.keys(ladder).map(Number).sort((a, b) => a - b)).toEqual([16, 24, 32, 48, 64, 128, 256, 512, 1024])
     expect(pngSize(ladder[ICON_PNG_SIZE])).toEqual({ width: ICON_PNG_SIZE, height: ICON_PNG_SIZE })
@@ -47,6 +58,9 @@ describe('application icon contract', () => {
       expect(payloadSize).toBe(ladder[size].length)
       expect(createHash('sha256').update(payload).digest('hex')).toBe(ICON_DERIVATIVE_SHA256[size])
       expect(pngSize(payload)).toEqual({ width: size, height: size })
+      expect(pngInfo(payload)).toMatchObject({ bitDepth: 8, colorType: 6, interlace: 0 })
+      expect([pngAlphaAt(payload, 0, 0), pngAlphaAt(payload, size - 1, 0), pngAlphaAt(payload, 0, size - 1), pngAlphaAt(payload, size - 1, size - 1)]).toEqual([0, 0, 0, 0])
+      expect(pngAlphaAt(payload, Math.floor(size / 2), Math.floor(size / 2))).toBe(255)
       offset += payloadSize
     })
     expect(offset).toBe(ico.length)
