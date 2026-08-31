@@ -7,9 +7,10 @@ import { PnpmLauncher } from '../src/main/profile/pnpm-launcher'
 import { BundleReconciler } from '../src/main/profile/bundle-reconciler'
 import { ProfileManager } from '../src/main/profile/profile-manager'
 import { WORKBENCH_TGZ as TGZ, WORKBENCH_SHA256 as SHA } from './support/workbench'
+import { resolvePnpmEntry as resolveTestPnpmEntry } from '../scripts/resolve-pnpm-entry.mjs'
 
-const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
-const NODE = '/opt/homebrew/bin/node'
+const PNPM = resolveTestPnpmEntry()
+const NODE = process.execPath
 
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e03-'))
 

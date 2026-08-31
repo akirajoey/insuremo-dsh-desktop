@@ -9,10 +9,12 @@ import { BundleReconciler } from '../src/main/profile/bundle-reconciler.ts'
 import { PluginService } from '../src/main/plugins/plugin-service.ts'
 import { createPluginManagerWindow } from '../src/main/windows/plugin-manager-window.ts'
 import { WORKBENCH_TGZ, WORKBENCH_SHA256 as WB_SHA } from './support/workbench.ts'
+import { ensureTestPluginTgz } from '../scripts/build-test-plugin-fixture.mjs'
+import { resolvePnpmEntry as resolveTestPnpmEntry } from '../scripts/resolve-pnpm-entry.mjs'
 
-const TEST_TGZ = '/tmp/e04-test-plugin.tgz'
-const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
-const NODE = '/opt/homebrew/bin/node'
+const TEST_TGZ = process.env.DSH_TEST_PLUGIN_TGZ ?? ensureTestPluginTgz().path
+const PNPM = resolveTestPnpmEntry()
+const NODE = process.execPath
 const PROJECT_ROOT = fileURLToPath(new URL('..', import.meta.url))
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e04-win-'))
 const userData = join(tmp, 'userData')

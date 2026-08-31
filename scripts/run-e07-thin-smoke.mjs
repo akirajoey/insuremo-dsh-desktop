@@ -3,11 +3,12 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ensureTestPluginTgz } from './build-test-plugin-fixture.mjs'
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const appPath = resolve(process.argv[2] ?? join(root, 'release/mac-arm64-Thin/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop'))
 const runtimeRoot = resolve(process.argv[3] ?? join(root, 'packaging/e07/runtime'))
-const pluginTgz = process.env.DSH_TEST_PLUGIN_TGZ ?? '/tmp/e04-test-plugin.tgz'
+const pluginTgz = process.env.DSH_TEST_PLUGIN_TGZ ?? ensureTestPluginTgz().path
 const invalidPort = 9251
 const autoQuitMs = process.env.DSH_TEST_AUTO_QUIT_AFTER_MS ?? '20000'
 

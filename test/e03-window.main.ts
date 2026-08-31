@@ -10,8 +10,10 @@ import { RuntimeController } from '../src/main/runtime/controller.ts'
 import { forkUtilityProcess } from '../src/main/runtime/utility-launcher.ts'
 import { parseHandshake } from '../src/main/runtime/launcher.ts'
 import { WORKBENCH_TGZ as TGZ, WORKBENCH_SHA256 as SHA } from './support/workbench.ts'
+import { resolvePnpmEntry as resolveTestPnpmEntry } from '../scripts/resolve-pnpm-entry.mjs'
 
-const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
+const PNPM = resolveTestPnpmEntry()
+const NODE = process.execPath
 const WRAPPER = fileURLToPath(new URL('../src/main/runtime/wrapper.cjs', import.meta.url))
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e03-window-'))
 const userData = join(tmp, 'userData')
@@ -22,10 +24,10 @@ let result = { ok: false, detail: '' }
 app.setPath('userData', userData)
 
 async function installWorkbench() {
-  const pm = new ProfileManager({ userData, dshHome, pnpmEntry: PNPM, nodePath: '/opt/homebrew/bin/node', workbenchTgzPath: TGZ, workbenchSha256: SHA })
+  const pm = new ProfileManager({ userData, dshHome, pnpmEntry: PNPM, nodePath: NODE, workbenchTgzPath: TGZ, workbenchSha256: SHA })
   const cached = pm.ensureWorkbenchArtifact()
   const staging = pm.materializeStagingProfile('window')
-  const r = await PnpmLauncher.run({ nodePath: '/opt/homebrew/bin/node', pnpmEntry: PNPM, cwd: staging, timeoutMs: 180_000 }, 'add', ['--save-exact', `file:${cached}`])
+  const r = await PnpmLauncher.run({ nodePath: NODE, pnpmEntry: PNPM, cwd: staging, timeoutMs: 180_000 }, 'add', ['--save-exact', `file:${cached}`])
   if (r.exitCode !== 0) throw new Error(`pnpm add: ${r.stderr}`)
   BundleReconciler.reconcile(staging)
   pm.activateStagedProfile(staging, 'window')

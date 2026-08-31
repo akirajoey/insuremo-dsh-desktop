@@ -1,0 +1,5 @@
+# Fixture plugin patch layer for tests and packaged smokes.
+- insert:
+    - id: test-plugin-probe
+      name: '@icomposer/test-plugin'
+      inject: []

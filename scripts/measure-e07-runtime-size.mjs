@@ -3,11 +3,12 @@ import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSyn
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { resolvePnpmEntry } from './resolve-pnpm-entry.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const pins = JSON.parse(readFileSync(join(root, 'config/runtime-pins.json'), 'utf8'))
 const version = pins.version
-const pnpmEntry = process.env.DSH_PNPM_ENTRY ?? '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
+const pnpmEntry = resolvePnpmEntry()
 const outputPath = process.env.DSH_SIZE_OUTPUT ?? 'docs/evidence/e07-runtime-size.json'
 const probeRoot = mkdtempSync(join(tmpdir(), 'dsh-runtime-size-'))
 const overrides = Object.fromEntries((pins.packages ?? []).map(name => [name, version]))

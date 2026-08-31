@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { ensureTestPluginTgz } from './build-test-plugin-fixture.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const appPath = resolve(process.argv[2] ?? join(root, 'release/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop'))
@@ -37,7 +38,7 @@ function assertOutput(code, expected, timeoutMs = 30_000, label = expected) {
 }
 
 function runHarnessSmoke() {
-  const plugin = process.env.DSH_TEST_PLUGIN_TGZ ?? '/tmp/e04-test-plugin.tgz'
+  const plugin = process.env.DSH_TEST_PLUGIN_TGZ ?? ensureTestPluginTgz().path
   if (!existsSync(plugin)) throw new Error('packaged smoke plugin fixture is missing')
   const result = spawnSync(process.execPath, ['scripts/run-e07-packaged-smoke.mjs', appPath], {
     cwd: root,

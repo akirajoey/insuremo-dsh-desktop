@@ -1,0 +1,11 @@
+{
+  "name": "@icomposer/test-plugin",
+  "version": "0.1.0",
+  "description": "Minimal reviewable fixture plugin used by desktop tests and packaged smokes.",
+  "type": "module",
+  "main": "lib/index.js",
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": { "platform": "web", "inject": [] }
+  }
+}

@@ -34,6 +34,22 @@ describe('E08 Windows packaging contract', () => {
     expect(text('src/main/profile/pnpm-launcher.ts')).toContain('windowsHide: true')
   })
 
+  it('resolves pnpm cross-platform without host prefixes', async () => {
+    const resolver = text('scripts/resolve-pnpm-entry.mjs')
+    expect(resolver).toContain("process.platform === 'win32' ? 'where.exe' : 'which'")
+    expect(resolver).toContain('DSH_TEST_PNPM_ENTRY')
+    expect(resolver).toContain('DSH_PNPM_ENTRY')
+    expect(resolver).toContain('npm_execpath')
+    expect(resolver).toContain("node_modules', 'pnpm', 'bin', 'pnpm.cjs'")
+    expect(resolver).not.toContain('/opt/homebrew')
+    const fixture = text('scripts/build-test-plugin-fixture.mjs')
+    expect(fixture).not.toContain("from 'node:child_process'")
+    expect(fixture).not.toContain('execFileSync')
+    const measure = text('scripts/measure-e07-runtime-size.mjs')
+    expect(measure).toContain("from './resolve-pnpm-entry.mjs'")
+    expect(measure).not.toContain('/opt/homebrew')
+  })
+
   it('uses CommandLineToArgvW-compatible quoting for Windows paths', () => {
     expect(quoteWindowsArgument('')).toBe('""')
     expect(quoteWindowsArgument('C:\\Program Files\\DSH')).toBe('"C:\\Program Files\\DSH"')

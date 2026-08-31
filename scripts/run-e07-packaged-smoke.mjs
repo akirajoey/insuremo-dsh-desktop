@@ -4,10 +4,11 @@ import { closeSync, existsSync, lstatSync, mkdirSync, mkdtempSync, openSync, rea
 import { networkInterfaces, tmpdir } from 'node:os'
 import { basename, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ensureTestPluginTgz } from './build-test-plugin-fixture.mjs'
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const appPath = process.argv[2] ?? join(root, 'release/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop')
-const pluginTgz = process.env.DSH_TEST_PLUGIN_TGZ ?? '/tmp/e04-test-plugin.tgz'
+const pluginTgz = process.env.DSH_TEST_PLUGIN_TGZ ?? ensureTestPluginTgz().path
 const ownsTestUserData = process.env.DSH_TEST_USER_DATA === undefined
 const testUserData = process.env.DSH_TEST_USER_DATA ?? mkdtempSync(join(tmpdir(), 'e07-packaged-clean-'))
 const autoQuitMs = process.env.DSH_TEST_AUTO_QUIT_AFTER_MS ?? '120000'

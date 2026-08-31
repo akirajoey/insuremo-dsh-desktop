@@ -7,10 +7,13 @@ import { PnpmLauncher } from '../src/main/profile/pnpm-launcher'
 import { BundleReconciler } from '../src/main/profile/bundle-reconciler'
 import { PluginService, sanitizeErrorMessage } from '../src/main/plugins/plugin-service'
 import { WORKBENCH_TGZ, WORKBENCH_SHA256 as WB_SHA } from './support/workbench'
+import { ensureTestPluginTgz } from '../scripts/build-test-plugin-fixture.mjs'
+import { resolvePnpmEntry as resolveTestPnpmEntry } from '../scripts/resolve-pnpm-entry.mjs'
 
-const TGZ = '/tmp/e04-test-plugin.tgz'
-const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
-const NODE = '/opt/homebrew/bin/node'
+const fixture = ensureTestPluginTgz()
+const TGZ = process.env.DSH_TEST_PLUGIN_TGZ ?? fixture.path
+const PNPM = resolveTestPnpmEntry()
+const NODE = process.execPath
 
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e04-'))
 
@@ -41,7 +44,7 @@ describe('E04 plugin service', () => {
     svc.registerCapability('cap-1', TGZ)
     const result = await svc.runOperation('add', 'tgz:cap-1', 'tgz:cap-1')
     expect(result.ok).toBe(true)
-    expect(result.provenance?.tgzSha256).toBe('3255f0e8496aaac7fdbd11f37df1f034a0ca851cc80bf468284b935e347ba883')
+    expect(result.provenance?.tgzSha256).toBe(fixture.sha256)
     expect(result.provenance?.lockfileIntegrity).not.toBe('')
 
     // The bundle must be in the manifest layer.

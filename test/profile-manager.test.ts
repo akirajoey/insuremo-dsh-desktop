@@ -25,7 +25,7 @@ function manager(workbenchTgz?: string): ProfileManager {
   return new ProfileManager({
     userData,
     dshHome,
-    pnpmEntry: '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs',
+    pnpmEntry: 'pnpm.cjs',
     nodePath: process.execPath,
     workbenchTgzPath: tgz,
     workbenchSha256: ProfileManager.sha256(tgz),
@@ -44,7 +44,7 @@ describe('pnpm launcher', () => {
   it('rejects non-fixed verbs', async () => {
     await expect(PnpmLauncher.run({
       nodePath: process.execPath,
-      pnpmEntry: '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs',
+      pnpmEntry: 'pnpm.cjs',
       cwd: tmp,
     }, 'exec', ['ls'])).rejects.toThrow()
   })

@@ -13,9 +13,10 @@ import { WindowStateStore } from '../src/main/app/window-state.ts'
 import { createHarnessWindow } from '../src/main/windows/harness-window.ts'
 import { createFailureWindow } from '../src/main/windows/failure-window.ts'
 import { WORKBENCH_TGZ, WORKBENCH_SHA256 as WB_SHA } from './support/workbench.ts'
+import { resolvePnpmEntry as resolveTestPnpmEntry } from '../scripts/resolve-pnpm-entry.mjs'
 
-const PNPM = '/opt/homebrew/lib/node_modules/pnpm/bin/pnpm.cjs'
-const NODE = '/opt/homebrew/bin/node'
+const PNPM = resolveTestPnpmEntry()
+const NODE = process.execPath
 const tmp = mkdtempSync(join(tmpdir(), 'insuremo-dsh-e05e06-'))
 const userData = join(tmp, 'userData')
 const dshHome = join(tmp, 'harness')
