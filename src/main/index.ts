@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme } from 'electron'
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   ABOUT_CAPABILITY,
@@ -19,6 +19,7 @@ import { WindowStateStore } from './app/window-state.ts'
 import { HarnessManager, readRuntimePin } from './app/harness-manager.ts'
 import { DiagnosticsService, type DiagnosticsContext } from './app/diagnostics.ts'
 import { installApplicationMenu, dockIconPath } from './app/menu.ts'
+import { createBootQueue, resolveActivation } from './app/window-activation.ts'
 import { resolveNodePath, resolvePnpmEntry } from './app/runtime-paths.ts'
 import {
   readPackagedVariant,
@@ -194,13 +195,55 @@ function bootstrap(): void {
     return window
   }
 
-  const raiseExisting = (): void => {
-    const harnessWindow = [...harnessWindows].at(-1)
-    const window = harnessWindow ?? getFailureWindow() ?? getPluginManagerWindow() ?? getAboutWindow() ?? createAboutWindow()
+  const anyDesktopWindowCount = (): number => BrowserWindow.getAllWindows().filter(window => !window.isDestroyed()).length
+
+  const raiseExisting = (): boolean => {
+    const harnessWindow = [...harnessWindows].filter(window => !window.isDestroyed()).at(-1)
+    const window = harnessWindow ?? getFailureWindow() ?? getPluginManagerWindow() ?? getAboutWindow()
+    if (window === undefined || window.isDestroyed()) return false
     if (window.isMinimized()) window.restore()
     window.show()
     window.focus()
+    return true
   }
+
+  // Serialized boots with generation supersession (see window-activation.ts):
+  // every request gets a generation; a superseded attempt must not touch any
+  // window, so a stale boot finishing late can never open a window and
+  // consecutive activate/Restart/Safe bursts can never duplicate windows.
+  const bootQueue = createBootQueue()
+
+  const bootAndShow = async (mode: 'normal' | 'safe'): Promise<{ ok: boolean; message: string }> => bootQueue.submit(async isCurrent => {
+    closeHarnessWindows()
+    if (runtimeError !== undefined) {
+      const message = runtimeError instanceof Error ? runtimeError.message : String(runtimeError)
+      lastContext = { ...lastContext, mode, phase: 'failed', message, stderrTail: '' }
+      if (isCurrent()) createFailureWindow(failureDeps())
+      return { ok: false, message: 'runtime unavailable' }
+    }
+    lastContext = { mode, phase: 'starting', message: '', stderrTail: '', profileHome: harness.homeFor(mode) }
+    let snapshot: Awaited<ReturnType<HarnessManager['start']>>
+    try {
+      snapshot = await harness.start(mode)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      lastContext = { ...lastContext, profileHome: harness.homeFor(mode), phase: 'failed', message, stderrTail: message }
+      if (isCurrent()) createFailureWindow(failureDeps())
+      return { ok: false, message }
+    }
+    if (!isCurrent()) return { ok: false, message: 'superseded by a newer boot request' }
+    lastContext = { ...lastContext, profileHome: harness.homeFor(mode), phase: snapshot.phase, message: snapshot.message, stderrTail: snapshot.message }
+    if (snapshot.phase === 'ready' && snapshot.url !== undefined) {
+      getFailureWindow()?.destroy()
+      openHarness(mode)
+      if (testOpenPluginManager && process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined) {
+        createPluginManagerWindow(plugins)
+      }
+    } else {
+      createFailureWindow(failureDeps())
+    }
+    return { ok: snapshot.phase === 'ready', message: snapshot.message }
+  })
 
   const selectExternalRuntime = async (): Promise<{ ok: boolean; message: string }> => {
     if (runtimeVariant !== 'thin') return { ok: false, message: 'runtime selection is available for Thin builds only' }
@@ -245,40 +288,34 @@ function bootstrap(): void {
     onSelectRuntime: selectExternalRuntime,
   })
 
-  const bootAndShow = async (mode: 'normal' | 'safe'): Promise<{ ok: boolean; message: string }> => {
-    closeHarnessWindows()
-    if (runtimeError !== undefined) {
-      const message = runtimeError instanceof Error ? runtimeError.message : String(runtimeError)
-      lastContext = { ...lastContext, mode, phase: 'failed', message, stderrTail: '' }
-      createFailureWindow(failureDeps())
-      return { ok: false, message: 'runtime unavailable' }
+  app.on('second-instance', () => {
+    handleActivate({ allowCreate: false })
+  })
+
+  // Activation decision (see window-activation.ts): never create a window
+  // while any exists, never duplicate during an in-flight boot.
+  const handleActivate = ({ allowCreate }: { allowCreate: boolean }): void => {
+    const snapshot = harness.snapshot()
+    const decision = resolveActivation({
+      pendingBootRequests: bootQueue.pending(),
+      harnessWindowCount: harnessWindows.size,
+      desktopWindowCount: anyDesktopWindowCount(),
+      harnessReady: snapshot.phase === 'ready' && snapshot.url !== undefined,
+      harnessRunning: harness.running,
+    })
+    if (decision === 'raise') {
+      raiseExisting()
+      return
     }
-    lastContext = { mode, phase: 'starting', message: '', stderrTail: '', profileHome: harness.homeFor(mode) }
-    let snapshot: Awaited<ReturnType<HarnessManager['start']>>
-    try {
-      snapshot = await harness.start(mode)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      lastContext = { ...lastContext, profileHome: harness.homeFor(mode), phase: 'failed', message, stderrTail: message }
-      createFailureWindow(failureDeps())
-      return { ok: false, message }
-    }
-    lastContext = { ...lastContext, profileHome: harness.homeFor(mode), phase: snapshot.phase, message: snapshot.message, stderrTail: snapshot.message }
-    if (snapshot.phase === 'ready' && snapshot.url !== undefined) {
-      getFailureWindow()?.destroy()
-      openHarness(mode)
-      if (testOpenPluginManager && process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined) {
-        createPluginManagerWindow(plugins)
-      }
-    } else {
-      createFailureWindow(failureDeps())
-    }
-    return { ok: snapshot.phase === 'ready', message: snapshot.message }
+    if (!allowCreate) return
+    if (decision === 'create') openHarness(harness.mode)
+    else if (decision === 'boot') void bootAndShow(harness.mode)
   }
 
-  app.on('second-instance', () => {
-    raiseExisting()
-  })
+  const newHarnessWindow = (): void => {
+    if (harness.snapshot().url !== undefined) openHarness(harness.mode)
+    else createAboutWindow()
+  }
 
   app.whenReady().then(() => {
     registerIpc()
@@ -287,20 +324,103 @@ function bootstrap(): void {
       plugins,
       userData,
       openAbout: () => createAboutWindow(),
-      newHarnessWindow: () => {
-        if (harness.snapshot().url !== undefined) openHarness(harness.mode)
-        else createAboutWindow()
-      },
+      newHarnessWindow,
       onRestart: () => { void bootAndShow(harness.mode) },
       onSafeMode: () => { void bootAndShow('safe') },
     })
     if (runtimeError !== undefined) createFailureWindow(failureDeps())
     else void bootAndShow(safeModeArg ? 'safe' : 'normal')
     app.on('activate', () => {
-      if (harness.snapshot().url !== undefined) openHarness(harness.mode)
-      else if (!harness.running) void bootAndShow(harness.mode)
+      handleActivate({ allowCreate: true })
     })
+    if (process.env.DSH_DESKTOP_TEST_ACTIVATE_DRIVER === '1' && process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined && process.env.DSH_DESKTOP_TEST_USER_DATA !== '') {
+      void runActivateDriver()
+    }
   })
+
+  // Hidden integration driver (TASK-074): requires BOTH
+  // DSH_DESKTOP_TEST_USER_DATA and DSH_DESKTOP_TEST_ACTIVATE_DRIVER, so it is
+  // unreachable in production. It exercises the real activation path by
+  // emitting genuine `app.emit('activate')` events and records window counts
+  // after each scenario for the vitest assertion to read.
+  const runActivateDriver = async (): Promise<void> => {
+    const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
+    const write = (results: Record<string, unknown>): void => {
+      try {
+        mkdirSync(join(userData, 'logs'), { recursive: true })
+        writeFileSync(join(userData, 'logs', 'activate-result.json'), JSON.stringify({ ok: true, ...results }, null, 2) + '\n')
+      } catch { /* best effort */ }
+    }
+    try {
+      const deadline = Date.now() + 90_000
+      while ((harnessWindows.size === 0 || harness.snapshot().phase !== 'ready') && Date.now() < deadline) await sleep(150)
+      if (harnessWindows.size === 0) throw new Error('harness window never became ready')
+      // 1) Five consecutive activations must keep exactly one window.
+      for (let index = 0; index < 5; index++) {
+        app.emit('activate')
+        await sleep(150)
+      }
+      await sleep(400)
+      const burstCount = harnessWindows.size
+      const burstWindow = [...harnessWindows].at(-1)
+      const burstUrl = burstWindow?.webContents.getURL() ?? ''
+      const harnessPort = new URL(burstUrl).port
+      // 2) Minimized window must be restored, not duplicated.
+      ;[...harnessWindows].at(-1)?.minimize()
+      app.emit('activate')
+      await sleep(400)
+      const restored = [...harnessWindows].at(-1)
+      const restoreCount = harnessWindows.size
+      const restoredMinimized = restored?.isMinimized() ?? true
+      // 3) Activations during an in-flight restart must not duplicate.
+      void bootAndShow(harness.mode)
+      for (let index = 0; index < 25; index++) {
+        app.emit('activate')
+        await sleep(100)
+      }
+      const bootDeadline = Date.now() + 60_000
+      while (harnessWindows.size === 0 && Date.now() < bootDeadline) await sleep(150)
+      await sleep(500)
+      const duringBootCount = harnessWindows.size
+      // 4) After every window closed, activation creates exactly one.
+      closeHarnessWindows()
+      await sleep(400)
+      app.emit('activate')
+      await sleep(600)
+      const afterCloseCount = harnessWindows.size
+      const afterCloseReady = harness.snapshot().phase === 'ready'
+      // 5) Explicit New Window stays available: 1 (from step 4) + 3 = 4.
+      const explicitBefore = harnessWindows.size
+      for (let index = 0; index < 3; index++) {
+        newHarnessWindow()
+        await sleep(200)
+      }
+      await sleep(300)
+      const explicitAfter = harnessWindows.size
+      write({
+        burstCount,
+        burstUrl,
+        harnessPort,
+        electronPid: process.pid,
+        restoreCount,
+        restoredMinimized,
+        duringBootCount,
+        afterCloseCount,
+        afterCloseReady,
+        explicitBefore,
+        explicitAfter,
+        snapshotUrl: typeof harness.snapshot().url === 'string',
+      })
+    } catch (error) {
+      write({ ok: false, error: error instanceof Error ? error.message : String(error) })
+    } finally {
+      // Quit through the one and only before-quit path (harness.stop with
+      // grace + forced-kill) so the packaged wrapper and every runtime
+      // resource are cleaned up. Never app.exit() from the driver.
+      await sleep(300)
+      app.quit()
+    }
+  }
 
   // True quit: never keep a resident harness. Shut the runtime down with a
   // grace window and force-kill past it.
@@ -315,6 +435,7 @@ function bootstrap(): void {
     })
   })
   app.on('window-all-closed', () => {
+    if (process.env.DSH_DESKTOP_TEST_KEEP_ALIVE_ON_ALL_CLOSED === '1' && process.env.DSH_DESKTOP_TEST_USER_DATA !== undefined && process.env.DSH_DESKTOP_TEST_USER_DATA !== '') return
     app.quit()
   })
 }
