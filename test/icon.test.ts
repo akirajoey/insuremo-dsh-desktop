@@ -6,10 +6,13 @@ import {
   ICON_DERIVATIVE_SHA256,
   ICON_PNG_SIZE,
   ICON_SOURCE,
+  ICON_SOURCE_ARCHIVE,
+  ICON_SOURCE_ARCHIVE_SHA256,
   ICON_SOURCE_SHA256,
   ICON_SOURCE_SIZE,
   ICO_LADDER,
   assembleIco,
+  decodePngPixels,
   pngAlphaAt,
   pngInfo,
   pngSize,
@@ -19,19 +22,40 @@ import {
 const root = resolve(import.meta.dirname, '..')
 
 describe('application icon contract', () => {
-  it('pins the design source and every committed derivative', () => {
+  it('pins the elephant source/archive and verifies the optical footprint', { timeout: 15_000 }, () => {
+    const archive = readFileSync(resolve(root, ICON_SOURCE_ARCHIVE))
+    expect(createHash('sha256').update(archive).digest('hex')).toBe(ICON_SOURCE_ARCHIVE_SHA256)
+    expect(pngInfo(archive)).toMatchObject({ width: ICON_SOURCE_SIZE, height: ICON_SOURCE_SIZE, bitDepth: 8, colorType: 2, compression: 0, filter: 0, interlace: 0 })
     const source = readFileSync(resolve(root, ICON_SOURCE))
     expect(createHash('sha256').update(source).digest('hex')).toBe(ICON_SOURCE_SHA256)
-    expect(pngInfo(source)).toMatchObject({ bitDepth: 8, colorType: 6, interlace: 0 })
+    expect(pngInfo(source)).toMatchObject({ width: ICON_SOURCE_SIZE, height: ICON_SOURCE_SIZE, bitDepth: 8, colorType: 6, compression: 0, filter: 0, interlace: 0 })
     expect(pngSize(source)).toEqual({ width: ICON_SOURCE_SIZE, height: ICON_SOURCE_SIZE })
+    const sourcePixels = decodePngPixels(source)
+    expect(sourcePixels.channels).toBe(4)
+    const alphaAt = (x: number, y: number) => sourcePixels.pixels[(y * sourcePixels.width + x) * sourcePixels.channels + 3]
+    let minX = sourcePixels.width
+    let minY = sourcePixels.height
+    let maxX = -1
+    let maxY = -1
+    for (let y = 0; y < sourcePixels.height; y++) {
+      for (let x = 0; x < sourcePixels.width; x++) {
+        if (alphaAt(x, y) === 0) continue
+        minX = Math.min(minX, x)
+        minY = Math.min(minY, y)
+        maxX = Math.max(maxX, x)
+        maxY = Math.max(maxY, y)
+      }
+    }
+    expect({ minX, minY, maxX, maxY }).toEqual({ minX: 93, minY: 93, maxX: 1159, maxY: 1159 })
+    expect(maxX - minX + 1).toBeGreaterThanOrEqual(1066)
+    expect(maxX - minX + 1).toBeLessThanOrEqual(1072)
     const sourceCorners = [[0, 0], [ICON_SOURCE_SIZE - 1, 0], [0, ICON_SOURCE_SIZE - 1], [ICON_SOURCE_SIZE - 1, ICON_SOURCE_SIZE - 1]]
-    expect(sourceCorners.map(([x, y]) => pngAlphaAt(source, x, y))).toEqual([0, 0, 0, 0])
-    expect(pngAlphaAt(source, 627, 7)).toBeGreaterThan(0)
-    expect(pngAlphaAt(source, 627, 8)).toBeLessThan(255)
-    expect(pngAlphaAt(source, 627, 10)).toBe(255)
-    expect(pngAlphaAt(source, 200, 20)).toBe(0)
-    expect(pngAlphaAt(source, 480, 20)).toBe(255)
-    expect(pngAlphaAt(source, 627, 627)).toBe(255)
+    expect(sourceCorners.map(([x, y]) => alphaAt(x, y))).toEqual([0, 0, 0, 0])
+    expect(alphaAt(627, 92)).toBe(0)
+    expect(alphaAt(627, 93)).toBeGreaterThan(0)
+    expect(alphaAt(627, 94)).toBeLessThan(255)
+    expect(alphaAt(627, 96)).toBe(255)
+    expect(alphaAt(627, 627)).toBe(255)
     const { ladder } = verifyDesignAssets()
     expect(Object.keys(ladder).map(Number).sort((a, b) => a - b)).toEqual([16, 24, 32, 48, 64, 128, 256, 512, 1024])
     expect(pngSize(ladder[ICON_PNG_SIZE])).toEqual({ width: ICON_PNG_SIZE, height: ICON_PNG_SIZE })
@@ -69,6 +93,7 @@ describe('application icon contract', () => {
 
   it('builds icon assets only from the pinned design source', () => {
     const script = readFileSync(resolve(root, 'scripts/gen-icon.mjs'), 'utf8')
+    expect(script).toContain('ICON_SOURCE_ARCHIVE_SHA256')
     expect(script).toContain('ICON_SOURCE_SHA256')
     // No image tooling can be invoked from the build script at all.
     expect(script).not.toContain("from 'node:child_process'")

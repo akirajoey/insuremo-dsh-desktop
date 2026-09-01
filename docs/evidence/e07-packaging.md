@@ -106,3 +106,50 @@ provided. A distribution release still requires a Developer ID identity and
 Apple notarization. Re-running with `CSC_LINK`/password and Apple notarization
 environment variables is the explicit release seam. The unsigned zip/DMG
 are development artifacts and must not be represented as notarized releases.
+
+## TASK-077 elephant icon refresh
+
+The supplied source was copied byte-for-byte to
+`design/archive/elephant-download-rgb.png` (SHA256
+`190e7d1093a0df6cd784dfb1e34741a92ce7a3992ef08d4024e97548d1fadd93`). The
+active `design/insuremo-dsh-elephant.png` is a 1254×1254 RGBA canvas containing
+the complete artwork uniformly resampled to a centered 1082×1082 square by the
+pure-Node deterministic Lanczos-3 asset generator. The TASK-073 fourth-order
+superellipse remains applied inside that square. The measured active non-zero
+alpha bbox is inclusive `93..1159` on both axes (half-open endpoint
+`(1160,1160)`), 1067×1067 (`85.09%`); the source SHA256
+is `8a801e66a5ec87b977d0f2e3dc57d27077508f506a325cee0168c27ae887ee67`.
+
+`scripts/gen-icon.mjs` verifies the committed 16/24/32/48/64/128/256/512/1024
+RGBA ladder and copies the 1024 derivative to `build/icon.png`; the refreshed
+build hashes are:
+
+- `build/icon.png`: `04fe34ef0af2758feda525c7cd9d2c311ffb4336110bda05cd9cba0165961390`
+- `build/icon.ico`: `97b28773206961af8000d4259653de6c223174d39fa90641af9f61e82884bb08`
+- packaged `icon.icns`: `809749d390ebe435b5d66697ec1f32122dc518a7e2699e58bba8e90a75c59bf9`
+
+The Full arm64 rebuild was produced with
+`pnpm package:e07:full:arm64:mac` and the verified Workbench tgz. Its current
+artifacts are recorded in `docs/evidence/e07-variants.json`:
+
+- ZIP `release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip` —
+  176,137,517 bytes, SHA256
+  `fa682a577cef832dfde81fcf06e795f60746d34df62c9290cec0c144bd4e1b65`
+- DMG `release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg` —
+  168,768,184 bytes, SHA256
+  `4e7f8c3d6b224580f3eec8aec69be9847743d3a872c2b2c2aba8519656d9803f`
+
+Thin arm64 was also rebuilt (`release/mac-arm64-Thin/`); its refreshed ZIP/DMG
+hashes and the four blockmap hashes are in the same evidence JSON. The Thin
+invalid-runtime recovery plus external-runtime normal/safe/plugin smoke also
+passed once after the refresh. `iconutil` extraction from both app bundles
+verified `CFBundleIdentifier`
+`com.insuremo.dsh.desktop`, `CFBundleIconFile` `icon.icns`, and a byte-equal
+1024×1024 largest representation (`04fe34…`, 872×872 non-zero alpha bbox).
+
+The Full packaged hidden smoke passed with an isolated temporary HOME carrying
+a copy of the 16 test skills and an isolated `DSH_TEST_USER_DATA`: normal and
+safe phases exited 0, Workbench/IMO/skills and plugin install/remove passed,
+LAN remained refused, `homeDshUnchanged` was true, and wrapper orphans were
+zero. Process observation showed every GPU/utility/renderer helper using the
+temporary `--user-data-dir`; no real production userData path was present.

@@ -1,6 +1,6 @@
 /**
  * Assemble the application icon set from the single active design source
- * (design/insuremo-dsh-glass-icon-v2-imo.png, hash-pinned below).
+ * (design/insuremo-dsh-elephant.png, hash-pinned below).
  *
  * - build/icon.png  — the committed 1024x1024 derivative (dock, BrowserWindow,
  *   menu, and electron-builder's icns input).
@@ -19,23 +19,25 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { inflateSync } from 'node:zlib'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-export const ICON_SOURCE = 'design/insuremo-dsh-glass-icon-v2-imo.png'
-export const ICON_SOURCE_SHA256 = 'aa84a60fbfcdc99eb69c8b458d1952d1cb2b3db7f51dc8659d8dfbe88b058b8d'
+export const ICON_SOURCE = 'design/insuremo-dsh-elephant.png'
+export const ICON_SOURCE_SHA256 = '8a801e66a5ec87b977d0f2e3dc57d27077508f506a325cee0168c27ae887ee67'
+export const ICON_SOURCE_ARCHIVE = 'design/archive/elephant-download-rgb.png'
+export const ICON_SOURCE_ARCHIVE_SHA256 = '190e7d1093a0df6cd784dfb1e34741a92ce7a3992ef08d4024e97548d1fadd93'
 export const ICON_SOURCE_SIZE = 1254
 export const ICON_PNG_SIZE = 1024
 export const ICO_LADDER = [16, 24, 32, 48, 64, 128, 256]
 
 /** Committed derivative pins (sha256 of each design/icons/icon-<size>.png). */
 export const ICON_DERIVATIVE_SHA256 = {
-  16: 'ca56a4b15b7e601d9e203dcc7183f50ae0b98471ca8c8e15ea8b02458cd83014',
-  24: '35ea627fbf85a0e0b2b957480f4c954473483a78acfd568becebe4d9efe61240',
-  32: '910c57930c147356404f157410ec88afafafab5dc0ca2719ae53569e9f8b7923',
-  48: '5c79255b2ff66966b62711161655225827de013dac54b9803c98f3bde6728ac3',
-  64: 'c1737b7ba92972813db7a097abb2b588d14d85cef0626bce1b0f07104ad72425',
-  128: '81adda616e416e3906b7e4abb37de27434c068bbc08015023d1853797d3334e6',
-  256: '96de57faeba2b6ae3d7792fcea903f4b58904e2fdd5d7fb70bce5b2cbe4a8bc7',
-  512: 'e276275da99c42741370a5b59f45718e0ca8bc0da7bb24c28e8a10af484e2ca8',
-  1024: '0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b',
+  16: 'ef3bd51c475168e55b44b676872a070498bfde545833608dac95cd22506d0f89',
+  24: '96ce51004b09cf6a17c20f1e8653b01f98cc3d1617c09d4f098f1d70abe2fc7a',
+  32: 'ef78bb6ef6d90b748151709495b3a20f71b8f088a00c3df2f283b685507a1cbd',
+  48: '96ca0392110985eeab3ed963135bbc3f0e52d0ec9377ba1c0b56ea55c1da797a',
+  64: '9934b5959d03356cfa785387818f8e21c3d094d2c7b2509619c372aef0e83fef',
+  128: 'f2a2bf4e2d5402ec86dd4076b5c9a8c44bad852c6badfb2014f4740ab56d93e0',
+  256: '93a50dd17b1f22e009cfe9c6f076e6de2091a10ba998dae625fa8358c29f74e7',
+  512: '940449f6fa204f1af833978f54efd5ea8bc6f07fb48578640d256ad8a75c409d',
+  1024: '04fe34ef0af2758feda525c7cd9d2c311ffb4336110bda05cd9cba0165961390',
 }
 
 export function sha256(bytes) {
@@ -64,32 +66,44 @@ export function pngSize(bytes) {
   return { width, height }
 }
 
-/** Read one alpha sample from an 8-bit RGBA, non-interlaced PNG. */
-export function pngAlphaAt(bytes, x, y) {
-  const { width, height, bitDepth, colorType, interlace } = pngInfo(bytes)
-  if (bitDepth !== 8 || colorType !== 6 || interlace !== 0) throw new Error('PNG must be 8-bit RGBA non-interlaced')
-  if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= width || y < 0 || y >= height) throw new Error(`PNG sample out of bounds: ${x},${y}`)
-  let offset = 8
+/** Decode 8-bit RGB/RGBA pixels without any image dependency. */
+export function decodePngPixels(bytes) {
+  const { width, height, bitDepth, colorType, compression, filter: method, interlace } = pngInfo(bytes)
+  if (bitDepth !== 8 || ![2, 6].includes(colorType) || compression !== 0 || method !== 0 || interlace !== 0) {
+    throw new Error('PNG must be 8-bit RGB/RGBA non-interlaced')
+  }
+  const channels = colorType === 6 ? 4 : 3
+  const stride = width * channels
   const idat = []
-  while (offset < bytes.length) {
+  let offset = 8
+  while (offset + 12 <= bytes.length) {
     const length = bytes.readUInt32BE(offset)
     const type = bytes.toString('ascii', offset + 4, offset + 8)
     if (type === 'IDAT') idat.push(bytes.subarray(offset + 8, offset + 8 + length))
     offset += length + 12
   }
-  const stride = width * 4
   const filtered = inflateSync(Buffer.concat(idat))
+  const pixels = Buffer.alloc(width * height * channels)
   let input = 0
   let previous = Buffer.alloc(stride)
-  for (let rowIndex = 0; rowIndex <= y; rowIndex++) {
-    const filter = filtered[input++]
+  for (let y = 0; y < height; y++) {
+    const rowFilter = filtered[input++]
     const row = Buffer.from(filtered.subarray(input, input + stride))
     input += stride
-    unfilterPngRow(row, previous, filter, 4)
-    if (rowIndex === y) return row[x * 4 + 3]
+    unfilterPngRow(row, previous, rowFilter, channels)
+    row.copy(pixels, y * stride)
     previous = row
   }
-  throw new Error('PNG row missing')
+  if (input !== filtered.length) throw new Error('PNG scanline payload has trailing bytes')
+  return { width, height, channels, pixels }
+}
+
+/** Read one alpha sample from an 8-bit RGBA, non-interlaced PNG. */
+export function pngAlphaAt(bytes, x, y) {
+  const decoded = decodePngPixels(bytes)
+  if (decoded.channels !== 4) throw new Error('PNG must be 8-bit RGBA non-interlaced')
+  if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= decoded.width || y < 0 || y >= decoded.height) throw new Error(`PNG sample out of bounds: ${x},${y}`)
+  return decoded.pixels[(y * decoded.width + x) * decoded.channels + 3]
 }
 
 function unfilterPngRow(row, previous, filter, bytesPerPixel) {
@@ -121,8 +135,11 @@ function readLadderPng(size) {
   return bytes
 }
 
-/** Verify the pinned design source and read the committed derivative ladder. */
+/** Verify the pinned source/archive and read the committed derivative ladder. */
 export function verifyDesignAssets() {
+  const archiveBytes = readFileSync(join(root, ICON_SOURCE_ARCHIVE))
+  const archiveDigest = sha256(archiveBytes)
+  if (archiveDigest !== ICON_SOURCE_ARCHIVE_SHA256) throw new Error(`archive source hash mismatch: ${archiveDigest}`)
   const sourceBytes = readFileSync(join(root, ICON_SOURCE))
   const digest = sha256(sourceBytes)
   if (digest !== ICON_SOURCE_SHA256) throw new Error(`design source hash mismatch: ${digest}`)
@@ -131,7 +148,7 @@ export function verifyDesignAssets() {
   if (bitDepth !== 8 || colorType !== 6 || compression !== 0 || filter !== 0 || interlace !== 0) throw new Error('design source must be 8-bit RGBA non-interlaced')
   const ladder = {}
   for (const size of Object.keys(ICON_DERIVATIVE_SHA256).map(Number)) ladder[size] = readLadderPng(size)
-  return { sourceBytes, ladder, sourceSha256: digest }
+  return { sourceBytes, ladder, sourceSha256: digest, archiveSha256: archiveDigest }
 }
 
 /** Assemble a PNG-embedded Windows ICO; entries must be square PNGs. */

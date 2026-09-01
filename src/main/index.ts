@@ -39,6 +39,10 @@ const safeModeArg = process.argv.includes('--safe-mode') || process.env.DSH_DESK
 function configureUserData(): void {
   const testOverride = process.env.DSH_DESKTOP_TEST_USER_DATA
   if (testOverride !== undefined && testOverride !== '') {
+    // app.setPath controls app APIs, while Chromium helper processes inherit
+    // their own switch. Set both before readiness so isolated packaged smoke
+    // cannot create GPU/network/renderer state in the operator's userData.
+    app.commandLine.appendSwitch('user-data-dir', testOverride)
     app.setPath('userData', testOverride)
     return
   }

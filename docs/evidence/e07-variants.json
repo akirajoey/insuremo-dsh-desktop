@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "task": "TASK-071/TASK-072/TASK-073/TASK-074",
+  "task": "TASK-071/TASK-072/TASK-073/TASK-074/TASK-077",
   "platform": "darwin",
   "arch": "arm64",
   "electron": "43.4.0",
@@ -16,27 +16,27 @@
       "description": "Embedded offline runtime; Electron run-as-Node replaces standalone Node",
       "artifacts": [
         {
-          "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
-          "size": 179327157,
-          "sha256": "4f95cda70a865fe5aa0c5071093ab3e4733961fbfbd204dd5609aa5105792088"
+          "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
+          "size": 176137517,
+          "sha256": "fa682a577cef832dfde81fcf06e795f60746d34df62c9290cec0c144bd4e1b65"
         },
         {
-          "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
-          "size": 183159,
-          "sha256": "1e0ac4113680988716c0562a8f958a3bb7371ca9122e499c40301532571dfd8e"
+          "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
+          "size": 180719,
+          "sha256": "855019efca8164e9a741673cc855514bc1fc45a27a3568267403a629126b8ba5"
         },
         {
-          "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
-          "size": 173652755,
-          "sha256": "0c0c765928ccefa361f6e50186afc3d32a41c997857236b35291bd6dc04359dc"
+          "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
+          "size": 168768184,
+          "sha256": "4e7f8c3d6b224580f3eec8aec69be9847743d3a872c2b2c2aba8519656d9803f"
         },
         {
-          "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
-          "size": 179080,
-          "sha256": "701d597c92124365c8d3e562ca5eb4a5a81bec44139ebb7c0f2abe84f346f89c"
+          "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
+          "size": 176767,
+          "sha256": "f3a40baeae9512299801838305ddf674246156f6ba1dd4705c2c376401e02a56"
         }
       ],
-      "installedAppBytes": 449353362,
+      "installedAppBytes": 446179476,
       "hiddenPackagedSmoke": {
         "ok": true,
         "settings": {
@@ -58,7 +58,14 @@
         "normalExit": 0,
         "safeExit": 0,
         "homeDshUnchanged": true,
-        "orphanWrappers": 0
+        "orphanWrappers": 0,
+        "userDataIsolation": {
+          "driver": "DSH_TEST_USER_DATA=<temporary> → DSH_DESKTOP_TEST_USER_DATA; HOME skill fixture isolated",
+          "helperUserDataDir": "<temporary>",
+          "realProductionUserDataRefs": 0,
+          "ownerMarkerAfter": false,
+          "loopbackListenerAfter": false
+        }
       },
       "signature": {
         "status": "unsigned",
@@ -78,7 +85,7 @@
         "cFBundleIconFile": "icon.icns",
         "iconIcnsPresent": true,
         "iconIcnsLargestRep": "icon_512x512@2x.png (1024x1024)",
-        "iconIcnsLargestRepSha256": "0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b",
+        "iconIcnsLargestRepSha256": "04fe34ef0af2758feda525c7cd9d2c311ffb4336110bda05cd9cba0165961390",
         "iconIcnsLargestRepMatchesDesignDerivative": true,
         "verification": "iconutil -c iconset extraction of the packaged app icon.icns",
         "iconIcnsRepByteEqualBuildIcon": true,
@@ -89,36 +96,94 @@
             0,
             0
           ],
-          "packagedRep200x20Alpha": 0,
-          "packagedRep480x20Alpha": 255,
+          "packagedRepTopAxis": [
+            {
+              "at": "512,75",
+              "alpha": 0
+            },
+            {
+              "at": "512,76",
+              "alpha": 49
+            },
+            {
+              "at": "512,77",
+              "alpha": 152
+            },
+            {
+              "at": "512,78",
+              "alpha": 243
+            },
+            {
+              "at": "512,79",
+              "alpha": 255
+            }
+          ],
           "packagedRepCenterAlpha": 255,
+          "sourceBbox": {
+            "minX": 93,
+            "minY": 93,
+            "maxX": 1159,
+            "maxY": 1159,
+            "width": 1067,
+            "height": 1067,
+            "footprintPercent": 85.08771929824562,
+            "bboxConvention": "inclusive max; half-open extent x=93..1160,y=93..1160",
+            "maxXExclusive": 1160,
+            "maxYExclusive": 1160
+          },
           "sourceCornersAlpha": [
             0,
             0,
             0,
             0
           ],
-          "sourceAxisEdge627x10Alpha": 255,
-          "sourceTopNoCornerCut200x20Alpha": 0,
-          "sourceTopFrame480x20Alpha": 255,
-          "sourceFeather": [
+          "sourceAxisTop": [
             {
-              "at": "627,7",
+              "at": "627,92",
+              "alpha": 0
+            },
+            {
+              "at": "627,93",
               "alpha": 42
             },
             {
-              "at": "627,8",
+              "at": "627,94",
               "alpha": 127
             },
             {
-              "at": "627,9",
+              "at": "627,95",
               "alpha": 212
             },
             {
-              "at": "627,10",
+              "at": "627,96",
               "alpha": 255
             }
-          ]
+          ],
+          "sourceCenterAlpha": 255,
+          "packagedRepBbox": {
+            "minX": 76,
+            "minY": 76,
+            "maxX": 947,
+            "maxY": 947,
+            "maxXExclusive": 948,
+            "maxYExclusive": 948,
+            "width": 872,
+            "height": 872,
+            "footprintPercent": 85.15625
+          }
+        },
+        "iconIcnsSha256": "809749d390ebe435b5d66697ec1f32122dc518a7e2699e58bba8e90a75c59bf9",
+        "iconBbox": {
+          "minX": 76,
+          "minY": 76,
+          "maxX": 947,
+          "maxY": 947,
+          "width": 872,
+          "height": 872,
+          "footprintPercent": 85.15625,
+          "bboxConvention": "inclusive max; half-open extent x=76..948,y=76..948",
+          "maxXExclusive": 948,
+          "maxYExclusive": 948
         }
       },
       "installedAppBytesMethod": "logical file bytes of the app bundle expanded from the release zip"
@@ -127,27 +192,27 @@
       "description": "No embedded runtime; strict external runtime root with Recovery picker",
       "artifacts": [
         {
-          "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
-          "size": 109388418,
-          "sha256": "5dfc3f090928592c7d17a65fe0326c5a9e1991cfa1958c61a9569209a662a084"
+          "path": "release/mac-arm64-Thin/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip",
+          "size": 107029838,
+          "sha256": "5e557c837afc23336ec5a9a3d238e1f3773a34bd92107e2deb63f8c1da6dfadc"
         },
         {
-          "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
-          "size": 114939,
-          "sha256": "2d4c7fac1adfc5a328b9033af7ebd476c206c58081430476747a4883d6647308"
+          "path": "release/mac-arm64-Thin/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
+          "size": 113013,
+          "sha256": "a17845608a2340ac33d888653547f554a5549b24dc09627f50dc6accee7b6bf3"
         },
         {
-          "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
-          "size": 115475897,
-          "sha256": "9c59d67fe719d80fa428e9de98dc25fa94d64b28fcfe863add3e1dbd420d230b"
+          "path": "release/mac-arm64-Thin/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg",
+          "size": 111686159,
+          "sha256": "dc0f46f6a6d9ae14be8080ea9fbcbdac4002deab17bc0aa76af29c9dda748ab8"
         },
         {
-          "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
-          "size": 120399,
-          "sha256": "2bb83d79a4ff53b3b3b370ab4ab7d9c0e1cab0f614e2147e3f302937ef886446"
+          "path": "release/mac-arm64-Thin/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
+          "size": 117273,
+          "sha256": "c9614a9d502f46e8b978e07684bb195464d4e2e032125b9e0c101f4d3967cfc2"
         }
       ],
-      "installedAppBytes": 247210782,
+      "installedAppBytes": 244865040,
       "hiddenPackagedSmoke": {
         "ok": true,
         "invalidRuntimeRecoveryShown": true,
@@ -163,7 +228,12 @@
           "homeDshUnchanged": true,
           "orphanWrappers": 0
         },
-        "consecutiveRuns": "3/3 PASS after cold-start determinism fix (autoQuit 60s, 20s text window, deterministic terminate)"
+        "userDataIsolation": {
+          "driver": "DSH_TEST_USER_DATA=<temporary> → DSH_DESKTOP_TEST_USER_DATA",
+          "helperUserDataDir": "<temporary>",
+          "realProductionUserDataRefs": 0
+        },
+        "task077Run": "PASS (one post-refresh run; prior 3/3 cold-start evidence remains historical)"
       },
       "signature": {
         "status": "unsigned",
@@ -182,7 +252,7 @@
         "cFBundleIconFile": "icon.icns",
         "iconIcnsPresent": true,
         "iconIcnsLargestRep": "icon_512x512@2x.png (1024x1024)",
-        "iconIcnsLargestRepSha256": "0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b",
+        "iconIcnsLargestRepSha256": "04fe34ef0af2758feda525c7cd9d2c311ffb4336110bda05cd9cba0165961390",
         "iconIcnsLargestRepMatchesDesignDerivative": true,
         "verification": "iconutil -c iconset extraction of the packaged app icon.icns",
         "iconIcnsRepByteEqualBuildIcon": true,
@@ -193,36 +263,94 @@
             0,
             0
           ],
-          "packagedRep200x20Alpha": 0,
-          "packagedRep480x20Alpha": 255,
+          "packagedRepTopAxis": [
+            {
+              "at": "512,75",
+              "alpha": 0
+            },
+            {
+              "at": "512,76",
+              "alpha": 49
+            },
+            {
+              "at": "512,77",
+              "alpha": 152
+            },
+            {
+              "at": "512,78",
+              "alpha": 243
+            },
+            {
+              "at": "512,79",
+              "alpha": 255
+            }
+          ],
           "packagedRepCenterAlpha": 255,
+          "sourceBbox": {
+            "minX": 93,
+            "minY": 93,
+            "maxX": 1159,
+            "maxY": 1159,
+            "width": 1067,
+            "height": 1067,
+            "footprintPercent": 85.08771929824562,
+            "bboxConvention": "inclusive max; half-open extent x=93..1160,y=93..1160",
+            "maxXExclusive": 1160,
+            "maxYExclusive": 1160
+          },
           "sourceCornersAlpha": [
             0,
             0,
             0,
             0
           ],
-          "sourceAxisEdge627x10Alpha": 255,
-          "sourceTopNoCornerCut200x20Alpha": 0,
-          "sourceTopFrame480x20Alpha": 255,
-          "sourceFeather": [
+          "sourceAxisTop": [
             {
-              "at": "627,7",
+              "at": "627,92",
+              "alpha": 0
+            },
+            {
+              "at": "627,93",
               "alpha": 42
             },
             {
-              "at": "627,8",
+              "at": "627,94",
               "alpha": 127
             },
             {
-              "at": "627,9",
+              "at": "627,95",
               "alpha": 212
             },
             {
-              "at": "627,10",
+              "at": "627,96",
               "alpha": 255
             }
-          ]
+          ],
+          "sourceCenterAlpha": 255,
+          "packagedRepBbox": {
+            "minX": 76,
+            "minY": 76,
+            "maxX": 947,
+            "maxY": 947,
+            "maxXExclusive": 948,
+            "maxYExclusive": 948,
+            "width": 872,
+            "height": 872,
+            "footprintPercent": 85.15625
+          }
+        },
+        "iconIcnsSha256": "809749d390ebe435b5d66697ec1f32122dc518a7e2699e58bba8e90a75c59bf9",
+        "iconBbox": {
+          "minX": 76,
+          "minY": 76,
+          "maxX": 947,
+          "maxY": 947,
+          "width": 872,
+          "height": 872,
+          "footprintPercent": 85.15625,
+          "bboxConvention": "inclusive max; half-open extent x=76..948,y=76..948",
+          "maxXExclusive": 948,
+          "maxYExclusive": 948
         }
       },
       "installedAppBytesMethod": "logical file bytes of the app bundle expanded from the release zip"
@@ -238,24 +366,47 @@
   },
   "icon": {
     "source": {
-      "path": "design/insuremo-dsh-glass-icon-v2-imo.png",
-      "sha256": "aa84a60fbfcdc99eb69c8b458d1952d1cb2b3db7f51dc8659d8dfbe88b058b8d",
+      "path": "design/insuremo-dsh-elephant.png",
+      "sha256": "8a801e66a5ec87b977d0f2e3dc57d27077508f506a325cee0168c27ae887ee67",
       "width": 1254,
       "height": 1254,
-      "colorType": "8-bit RGBA with transparent outer alpha mask",
-      "opaqueArchive": {
-        "path": "design/archive/insuremo-dsh-glass-icon-v2-imo-opaque-rgb.png",
-        "sha256": "6fb21082817bfcd7cfffe57e791bd4e11467561db71a2d7a17d772fd971188c7"
-      }
+      "colorType": "8-bit RGBA with centered optical safe-area artwork",
+      "attribution": {
+        "source": "/Users/junjie.zhang/Downloads/download.png",
+        "archivePath": "design/archive/elephant-download-rgb.png",
+        "archiveSha256": "190e7d1093a0df6cd784dfb1e34741a92ce7a3992ef08d4024e97548d1fadd93",
+        "archiveFormat": "1254x1254 8-bit RGB non-interlaced"
+      },
+      "artworkScale": {
+        "input": "1254x1254",
+        "centeredSquare": 1082,
+        "scale": 0.8628389154704944,
+        "marginPx": 86,
+        "resampler": "deterministic separable Lanczos-3",
+        "activeRgbPixelEquality": false
+      },
+      "supersededHistory": [
+        {
+          "path": "design/insuremo-dsh-glass-icon-v2-imo.png",
+          "status": "superseded; retained as design history",
+          "sha256": "aa84a60fbfcdc99eb69c8b458d1952d1cb2b3db7f51dc8659d8dfbe88b058b8d"
+        },
+        {
+          "path": "design/archive/insuremo-dsh-glass-icon-v2-imo-opaque-rgb.png",
+          "status": "superseded historical archive",
+          "sha256": "6fb21082817bfcd7cfffe57e791bd4e11467561db71a2d7a17d772fd971188c7"
+        }
+      ]
     },
     "buildPng": {
       "path": "build/icon.png",
       "size": 1024,
-      "sha256": "0e4408ad7bf8356f2c3896be04a901fc182f3b3b639989f8072d515d9a39413b",
+      "sha256": "04fe34ef0af2758feda525c7cd9d2c311ffb4336110bda05cd9cba0165961390",
       "from": "design/icons/icon-1024.png"
     },
     "buildIco": {
       "path": "build/icon.ico",
+      "sha256": "97b28773206961af8000d4259653de6c223174d39fa90641af9f61e82884bb08",
       "pngEntries": [
         16,
         24,
@@ -268,20 +419,50 @@
       "widthByte256": 0,
       "rgbaEntries": true
     },
+    "derivativePins": {
+      "16": "ef3bd51c475168e55b44b676872a070498bfde545833608dac95cd22506d0f89",
+      "24": "96ce51004b09cf6a17c20f1e8653b01f98cc3d1617c09d4f098f1d70abe2fc7a",
+      "32": "ef78bb6ef6d90b748151709495b3a20f71b8f088a00c3df2f283b685507a1cbd",
+      "48": "96ca0392110985eeab3ed963135bbc3f0e52d0ec9377ba1c0b56ea55c1da797a",
+      "64": "9934b5959d03356cfa785387818f8e21c3d094d2c7b2509619c372aef0e83fef",
+      "128": "f2a2bf4e2d5402ec86dd4076b5c9a8c44bad852c6badfb2014f4740ab56d93e0",
+      "256": "93a50dd17b1f22e009cfe9c6f076e6de2091a10ba998dae625fa8358c29f74e7",
+      "512": "940449f6fa204f1af833978f54efd5ea8bc6f07fb48578640d256ad8a75c409d",
+      "1024": "04fe34ef0af2758feda525c7cd9d2c311ffb4336110bda05cd9cba0165961390"
+    },
     "derivativesPinnedIn": "scripts/gen-icon.mjs (ICON_DERIVATIVE_SHA256); generation command recorded in design/README.md",
     "macIconPath": "electron-builder icon.icns from build/icon.png",
     "alphaMask": {
       "model": "4th-order superellipse",
-      "center": "(626.5, 626.5) pixel centers",
-      "radii": 616.5,
+      "localArtworkSquare": 1082,
+      "outputCanvas": 1254,
+      "center": "(540.5, 540.5) local; output center (626.5, 626.5)",
+      "radii": 530.5,
       "insetPx": 10,
       "featherPx": 3,
       "formula": "alpha = round(clamp((d + 3) / 3, 0, 1) * 255)",
-      "generator": "scripts/apply-icon-alpha.mjs (one-time, never run by the build)"
+      "artworkMarginPx": 86,
+      "nonZeroAlphaBbox": {
+        "x": [
+          93,
+          1159
+        ],
+        "y": [
+          93,
+          1159
+        ],
+        "width": 1067,
+        "height": 1067,
+        "footprintPercent": 85.08771929824562,
+        "bboxConvention": "inclusive max; half-open extent x=93..1160,y=93..1160",
+        "maxXExclusive": 1160,
+        "maxYExclusive": 1160
+      },
+      "generator": "scripts/apply-icon-alpha.mjs (archive→active, rerunnable, one-time, never run by the build)"
     }
   },
-  "recordedAt": "2026-08-31T04:40:04.763Z",
-  "reRecordNote": "Re-recorded for TASK-074 clean-quit driver fix; Full/Thin rebuilt from the changed main process and re-verified (no repackaging after recording).",
+  "recordedAt": "2026-09-01T04:13:11.048Z",
+  "reRecordNote": "Re-recorded for TASK-077 elephant artwork: exact RGB archive attribution, centered 1082px Lanczos-3 artwork, TASK-073 alpha mask, 85% optical bbox, refreshed Full and Thin arm64 artifacts and post-refresh smoke. Full/Thin isolated drivers use the Chromium user-data-dir override; the earlier real-userData incident and residual are documented below.",
   "activateSingleFlight": {
     "schemaVersion": 1,
     "fixed": "app activate no longer creates windows while any exists; boot queue serializes with generation supersession",
@@ -293,5 +474,30 @@
       "integrationTest": "test/e07-activate.test.ts waits for natural exit, then asserts 0 wrapper orphans, 0 processes referencing the isolated userData, 0 LISTEN on the harness port, and userData released",
       "packagedDriverRounds": "3/3 consecutive PASS (orphan0) against the released Full zip expansion"
     }
+  },
+  "task077Incident": {
+    "cause": "A pre-fix release app launch relied on app.setPath(userData) only; Chromium helper processes retained Electron’s default userData because no command-line user-data-dir switch was applied before readiness.",
+    "observedReleaseProcessCleanup": {
+      "releaseAppAndHelpersTerminated": true,
+      "releasePidsRemaining": 0,
+      "wrapperRefsRemaining": 0,
+      "runtimeOwnerRemaining": false,
+      "loopbackListenersRemaining": 0,
+      "applicationsAppTouched": false
+    },
+    "persistentRootCheck": {
+      "status": "residual-nonzero",
+      "incidentWindow": "2026-09-01 11:30–11:33 +0800",
+      "modifiedClasses": [
+        "Chromium Cache/Code Cache/Blob Storage/Session Storage/DIPS",
+        "harness/profiles/web/cordis.yml",
+        "harness/storages/workbench_imo_skill_activation.json",
+        "desktop-state directory mtime"
+      ],
+      "secretsOrCredentialContentInspected": false,
+      "configurationOrCredentialModificationEvidence": "none observed from path/type/mtime-only inspection",
+      "cleanupAction": "not deleted or restored under the no-touch real-userData boundary; maintainer backup-based review required"
+    },
+    "prevention": "configureUserData() now calls app.commandLine.appendSwitch('user-data-dir', testOverride) before app.setPath('userData', testOverride); subsequent isolated driver observed temp userData in GPU/utility/renderer command lines."
   }
 }

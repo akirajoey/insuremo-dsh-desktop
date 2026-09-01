@@ -12,6 +12,12 @@ it('records the accepted local-access decision without machine-specific data', a
   expect(adr).not.toMatch(/\/Users\/|[A-Z]:\\/)
 })
 
+it('isolates Chromium helper userData when the packaged test seam is enabled', async () => {
+  const source = await readFile(resolve(root, 'src/main/index.ts'), 'utf8')
+  expect(source).toContain("app.commandLine.appendSwitch('user-data-dir', testOverride)")
+  expect(source).toContain("app.setPath('userData', testOverride)")
+})
+
 describe('exact runtime pins', () => {
   it('keeps direct dependencies exact', async () => {
     const packageJson = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8')) as {
