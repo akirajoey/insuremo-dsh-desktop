@@ -35,6 +35,7 @@
     "package:e07:full:arm64:mac": "pnpm build && DSH_RUNTIME_ARCH=arm64 pnpm build:e07:resources && DSH_DESKTOP_VARIANT=full CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config scripts/electron-builder-config.mjs --mac zip dmg --arm64 --publish never --config.directories.output=release/mac-arm64-Full",
     "package:e07:full:x64:dir": "pnpm build && DSH_RUNTIME_ARCH=x64 pnpm build:e07:resources && DSH_DESKTOP_VARIANT=full CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config scripts/electron-builder-config.mjs --dir --x64 --publish never --config.directories.output=release/mac-x64-Full",
     "smoke:e07:packaged": "node scripts/run-e07-packaged-smoke.mjs",
+    "smoke:e07:diagnosis": "node scripts/run-e07-diagnosis-smoke.mjs",
     "smoke:e07:thin": "node scripts/run-e07-thin-smoke.mjs",
     "scan:e07:artifacts": "node scripts/scan-e07-artifacts.mjs",
     "record:e07:artifacts": "node scripts/record-e07-artifacts.mjs",

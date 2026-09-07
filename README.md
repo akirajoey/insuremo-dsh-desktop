@@ -31,15 +31,23 @@ hash-checked):
 ```bash
 DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm package:e07:arm64:dir
 DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm package:e07:arm64:mac
-pnpm smoke:e07:packaged
+APP=release/mac-arm64-Full/mac-arm64/InsureMO\ DSH\ Desktop.app
+node scripts/run-e07-packaged-smoke.mjs "$APP/Contents/MacOS/InsureMO DSH Desktop"
+pnpm smoke:e07:diagnosis "$APP"
 ```
 
 `package:e07:arm64:dir` is an unsigned development directory by default;
 `signed-dir` uses the configured local signing identity and refreshes the
-post-sign resource manifest. The smoke runner uses the explicit test-only
-`DSH_DESKTOP_TEST_USER_DATA` seam so clean-user-data tests do not depend on
-macOS HOME handling. Distribution builds provide the CSC/Apple notarization
-environment variables described in `docs/evidence/e07-packaging.md`.
+post-sign resource manifest. The two smoke runners use explicit test-only
+`DSH_DESKTOP_TEST_USER_DATA` seams so clean-user-data tests do not depend on
+macOS HOME handling. `smoke:e07:diagnosis` uses a temporary fake `npx` which
+exits non-zero; it never performs a registry/global install or model request.
+Distribution builds provide the CSC/Apple notarization environment variables
+described in `docs/evidence/e07-packaging.md`.
+
+The exact source-to-desktop synchronization order, Workbench hash, runtime
+provenance, manual install backup, and rollback procedure are documented in
+[`docs/workbench-sync.md`](docs/workbench-sync.md).
 
 E08 Windows packaging runs on a native Windows x64 runner:
 
@@ -73,9 +81,14 @@ window, main frame, exact origin, and capability before handling a request.
 ## Version policy
 
 All installed direct dependencies are exact pins. The runtime contract targets
-Electron 43.4.0, bundled Node 24.9.0, pnpm 11.7.0, and official DSH 0.1.0-rc.7.
+Electron 43.4.0, pnpm 11.7.0, and official DSH 0.1.0-rc.7; standalone bundled
+Node is 24.9.0 where that runtime mode is used.
 The exact E07 packaging pin is `electron-builder@26.0.12`; it is installed and
-locked in `pnpm-lock.yaml`. The resource preparation step uses a one-command
-`block-exotic-subdeps=false` resolution seam only to admit electron-builder's
-pinned `@electron/node-gyp` git dependency; subsequent frozen installs use the
-lockfile.
+locked in `pnpm-lock.yaml`. On macOS E07 the runtime manifest intentionally
+records Node `24.18.1`: this is Electron `43.4.0`'s embedded Node used in
+`electron-run-as-node` mode. The `24.9.0` Node contract remains for the
+standalone bundled-node mode used by other targets (including Windows E08);
+it is not a macOS runtime drift. The resource preparation step uses a
+one-command `block-exotic-subdeps=false` resolution seam only to admit
+electron-builder's pinned `@electron/node-gyp` git dependency; subsequent
+frozen installs use the lockfile.

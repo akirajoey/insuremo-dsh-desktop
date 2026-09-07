@@ -9,7 +9,7 @@ import { resolve } from 'node:path'
 export const WORKBENCH_TGZ = process.env.DSH_WORKBENCH_TGZ
   ?? resolve(process.cwd(), '../icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz')
 
-export const WORKBENCH_SHA256 = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
+export const WORKBENCH_SHA256 = '1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5'
 
 export function ensureWorkbenchTgz(): string {
   if (!existsSync(WORKBENCH_TGZ)) {

@@ -5,7 +5,7 @@ import type { CompatibilityManifest } from './contracts.ts'
 export const COMPATIBILITY_FILE = 'compatibility.json'
 export const REQUIRED_DESKTOP_VERSION = '0.1.0'
 export const REQUIRED_DSH_VERSION = '0.1.0-rc.7'
-export const REQUIRED_WORKBENCH_SHA256 = 'b1019017b79782a97b0b980268c2250384446ae5bbed8cb62af41c0754bdc59f'
+export const REQUIRED_WORKBENCH_SHA256 = '1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5'
 
 export function readCompatibility(path: string): CompatibilityManifest {
   if (isAbsolute(path) && !path.endsWith(COMPATIBILITY_FILE)) throw new Error('compatibility path must name compatibility.json')
