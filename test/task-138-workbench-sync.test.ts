@@ -115,11 +115,17 @@ describe('TASK-138 build-source hygiene (risk: high - local patches or user data
   })
 
   it('leaves no superseded Workbench identity behind in tracked sources', () => {
-    const stale = sourceFiles().filter((path) => {
-      const body = text(path)
-      return body.includes(supersededSha) || body.includes(supersededCommit)
-    })
-    expect(stale).toEqual([])
+    const supersededShaFiles = sourceFiles().filter((path) => text(path).includes(supersededSha))
+    expect(supersededShaFiles).toEqual([])
+    // The guide may name the older baseline once, and only as the branch `main`
+    // still carries; it must never present it as the accepted sync source.
+    const guide = text('docs/workbench-sync.md')
+    expect(guide.match(new RegExp(supersededCommit, 'gu'))?.length).toBe(1)
+    expect(guide).toMatch(new RegExp('`main`\\s+branch still points at the earlier accepted baseline `' + supersededCommit + '`', 'u'))
+    const supersededCommitFiles = sourceFiles()
+      .filter((path) => !path.endsWith('.md'))
+      .filter((path) => text(path).includes(supersededCommit))
+    expect(supersededCommitFiles).toEqual([])
   })
 })
 

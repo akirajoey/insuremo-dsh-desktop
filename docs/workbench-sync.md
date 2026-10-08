@@ -12,12 +12,16 @@ core. The current accepted pair is:
 | Desktop target | macOS arm64 Full development `.app` directory |
 
 Release state (2026-10-08): `8119f0cd2cd036d84f7351c82339ff00427f95f9` is
-published on `main` (TASK-137 push range `bd062731..8119f0cd`, 13 commits) and
-the accepted Desktop artifact is the tarball that TASK-136 built from exactly
-that tree and deployed as the Workbench update. TASK-138 re-verified that
-tarball against a fresh `pack:dist` of the same tree before pinning it here.
-Desktop is a separate repository and is not pushed by this task; the accepted
-source is identified by commit and artifact hash, not by branch name.
+published on the Workbench **`desktop`** branch (TASK-137 fast-forward push,
+`bd062731..8119f0cd`, 13 commits, `desktop`→`desktop`). The Workbench `main`
+branch still points at the earlier accepted baseline `737dbcb` — `main` is also
+`origin/HEAD`, the repository default — so this sync depends on the `desktop`
+branch and not on `main` moving. The accepted Desktop artifact is the tarball
+that TASK-136 built from `8119f0c` and deployed as the Workbench update.
+TASK-138 re-verified that tarball against a fresh `pack:dist` of the same tree
+before pinning it here. Desktop is a separate repository and is not pushed by
+this task; the accepted source is identified by commit and artifact hash, not
+by branch name.
 
 ### Accepted-artifact provenance (read before re-verifying)
 
@@ -60,6 +64,7 @@ export WB_TGZ="$WB_REPO/dist-release/icomposer-workbench-0.1.0.tgz"
 export WB_SHA=52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7
 
 cd "$WB_REPO"
+# The accepted commit is on the Workbench 'desktop' branch; 'main' still carries the older baseline.
 test "$(git rev-parse --short=7 HEAD)" = 8119f0c
 pnpm install --frozen-lockfile
 pnpm check
