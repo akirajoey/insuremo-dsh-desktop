@@ -20,7 +20,7 @@ import { tmpdir } from 'node:os'
 
 const root = resolve(import.meta.dirname, '..')
 const expectedWorkbenchSha256 = (process.env.DSH_WORKBENCH_SHA256
-  ?? '1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5').toLowerCase()
+  ?? '52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7').toLowerCase()
 const defaultApp = join(root, 'release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app')
 const requestedApp = process.env.DSH_DIAGNOSIS_APP ?? process.argv[2] ?? defaultApp
 const appBundle = requestedApp.endsWith('.app') ? requestedApp : resolve(requestedApp, '../../..')
@@ -35,6 +35,7 @@ const userData = join(smokeRoot, 'userData')
 const home = join(smokeRoot, 'home')
 const fakeBin = join(smokeRoot, 'fakebin')
 const marker = join(smokeRoot, 'fake-npx-runs.log')
+const npxTrace = join(smokeRoot, 'fake-npx-trace.log')
 const npmCache = join(smokeRoot, 'npm-cache')
 const npmPrefix = join(smokeRoot, 'npm-prefix')
 const xdgConfig = join(smokeRoot, 'xdg-config')
@@ -51,6 +52,9 @@ writeFileSync(join(fakeBin, 'npx'), [
   'printf "%s\\n" "synthetic npx stdout (TASK-087 packaged diagnosis)"',
   'printf "%s\\n" "synthetic npx stderr canary=$SMOKE_CANARY" >&2',
   'printf "%s\\n" "$SMOKE_CANARY" >> "$SMOKE_NPX_MARKER"',
+  // Diagnostics only: one trace line per invocation (argv + caller) so the
+  // expected invocation count can be explained from the result JSON.
+  'printf "%s argv=%s ppid=%s caller=%s\\n" "$(date +%s.%N)" "$*" "$PPID" "$(ps -o comm= -p "$PPID" 2>/dev/null || printf unknown)" >> "$SMOKE_NPX_TRACE"',
   'exit 1',
   '',
 ].join('\n'), { mode: 0o755 })
@@ -78,6 +82,7 @@ const env = {
   DSH_DESKTOP_TEST_AUTO_QUIT_AFTER_MS: '300000',
   SMOKE_CANARY: canary,
   SMOKE_NPX_MARKER: marker,
+  SMOKE_NPX_TRACE: npxTrace,
   NO_COLOR: '1',
   NODE_OPTIONS: '',
   npm_config_update_notifier: 'false',
@@ -113,6 +118,7 @@ const result = {
   expectedWorkbenchSha256,
   errors: [],
   console: [],
+  consoleIgnored: [],
   requests: [],
 }
 let child
@@ -123,6 +129,16 @@ let captureClosed = false
 
 const sleep = ms => new Promise(resolvePromise => setTimeout(resolvePromise, ms))
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
+// Electron's own DevTools/sandbox bootstrap sometimes reports a renderer-side
+// error on the debugged page before any application script runs. It is not an
+// application console error, so it is recorded separately (`consoleIgnored`)
+// instead of failing the smoke; every other console entry stays fatal.
+const ELECTRON_INTERNAL_CONSOLE = /sandboxed_renderer\.bundle\.js|binding\.startupData/u
+function pushConsole(entry) {
+  const line = String(entry).slice(0, 800)
+  if (ELECTRON_INTERNAL_CONSOLE.test(line)) result.consoleIgnored.push(line)
+  else result.console.push(line)
+}
 async function freePort() {
   const server = createServer()
   await new Promise((resolvePromise, reject) => {
@@ -203,11 +219,11 @@ async function attachCapture() {
   captureSocket.onmessage = event => {
     const message = JSON.parse(event.data)
     if (message.method === 'Runtime.exceptionThrown') {
-      result.console.push(`EXC ${message.params.exceptionDetails?.exception?.description ?? message.params.exceptionDetails?.text ?? 'unknown exception'}`.slice(0, 800))
+      pushConsole(`EXC ${message.params.exceptionDetails?.exception?.description ?? message.params.exceptionDetails?.text ?? 'unknown exception'}`)
     }
     if (message.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(message.params.type)) {
       const args = (message.params.args ?? []).map(arg => arg.value ?? arg.description ?? '').join(' ')
-      result.console.push(`${message.params.type} ${args}`.slice(0, 800))
+      pushConsole(`${message.params.type} ${args}`)
     }
     if (message.method === 'Network.requestWillBeSent') {
       const request = message.params.request
@@ -439,7 +455,21 @@ try {
   result.runtime = runtimeEvidence()
   result.served = await servedClientEvidence()
   result.fakeNpxRuns = existsSync(marker) ? readFileSync(marker, 'utf8').trim().split(/\r?\n/u).filter(Boolean).length : 0
-  if (result.fakeNpxRuns !== 1) throw new Error(`fake npx invocation count was ${result.fakeNpxRuns}, expected 1`)
+  result.fakeNpxTrace = existsSync(npxTrace) ? readFileSync(npxTrace, 'utf8').trim().split(/\r?\n/u).filter(Boolean) : []
+  // The current Workbench install flow reaches the skills tool twice: a
+  // bootstrap `skills-tool add` and the scenario-scoped add
+  // (`-s icomposer-full-stack`). Both must be synthetic failing invocations of
+  // the same read-only-shaped command; nothing else may use npx.
+  const scenarioAdds = result.fakeNpxTrace.filter(line => line.includes('-s icomposer-full-stack'))
+  const bootstrapAdds = result.fakeNpxTrace.filter(line => !line.includes('-s icomposer-full-stack'))
+  const onlySkillsToolAdds = result.fakeNpxTrace.every(line => line.includes('@insuremo/skills-tool add insuremo-skills'))
+  if (result.fakeNpxRuns !== result.fakeNpxTrace.length
+    || result.fakeNpxRuns !== 2
+    || !onlySkillsToolAdds
+    || scenarioAdds.length !== 1
+    || bootstrapAdds.length !== 1) {
+    throw new Error(`unexpected fake npx invocations (${result.fakeNpxRuns}): ${JSON.stringify(result.fakeNpxTrace)}`)
+  }
   if (result.runtime.workbench.sha256 !== expectedWorkbenchSha256 || result.runtime.workbench.actualSha256 !== expectedWorkbenchSha256) throw new Error('embedded Workbench tgz hash does not match expected verified artifact')
   if (result.runtime.compatibility !== expectedWorkbenchSha256) throw new Error('packaged compatibility mapping does not match Workbench hash')
   if (result.runtime.installedClientSha256 === null || result.runtime.tarClientSha256 === null || result.runtime.installedClientSha256 !== result.runtime.tarClientSha256) throw new Error('installed Workbench client does not match tar client')

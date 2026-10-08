@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { REQUIRED_WORKBENCH_SHA256 } from '../src/main/upgrade/compatibility'
 
 const root = resolve(import.meta.dirname, '..')
-const expected = '1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5'
+const expected = '52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7'
 const digest = (path: string): string => createHash('sha256').update(readFileSync(path)).digest('hex')
 
 function text(path: string): string {
@@ -30,7 +30,7 @@ describe('TASK-087 Workbench synchronization contract', () => {
 
   it('documents source build order, stock rc.7 runtime, and isolated diagnosis smoke', () => {
     const guide = text('docs/workbench-sync.md')
-    expect(guide).toContain('737dbcb')
+    expect(guide).toContain('8119f0c')
     expect(guide).toContain('0.1.0-rc.7')
     expect(guide).toContain('pnpm bundle')
     expect(guide).toContain('pnpm pack:git-dist')

@@ -1,22 +1,44 @@
-# Workbench-to-Desktop synchronization (TASK-087)
+# Workbench-to-Desktop synchronization (TASK-087 / TASK-138)
 
 This runbook updates the Desktop's bundled Workbench without changing DSH
 core. The current accepted pair is:
 
 | component | accepted source |
 | --- | --- |
-| Workbench source | `icomposer-workbench` commit `737dbcb` (`feat(settings): dedicated install-diagnosis workspace with plugin prefill`) |
-| Workbench artifact | `icomposer-workbench-0.1.0.tgz`, SHA256 `1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5` |
+| Workbench source | `icomposer-workbench` commit `8119f0c` (`fix(ici): make read-range mistakes correctable and label every error honestly`) |
+| Workbench artifact | `icomposer-workbench-0.1.0.tgz`, SHA256 `52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7` |
 | Desktop runtime | official DSH `0.1.0-rc.7`, macOS E07 runtime graph |
 | macOS runtime mode | Electron `43.4.0` `electron-run-as-node`, embedded Node `24.18.1` |
 | Desktop target | macOS arm64 Full development `.app` directory |
 
-Release state (2026-09-07): `737dbcb` is published on `main` and the
-`plugin-dist` installer payload `0447d28` is generated from the same tree;
-this task's Desktop `.app` is built from that published artifact and does not
-need any other branch. Desktop is a separate repository and is not pushed by
-this task; the accepted source is identified by commit and artifact hash, not
-by branch name.
+Release state (2026-10-08): `8119f0cd2cd036d84f7351c82339ff00427f95f9` is
+published on `main` (TASK-137 push range `bd062731..8119f0cd`, 13 commits) and
+the accepted Desktop artifact is the tarball that TASK-136 built from exactly
+that tree and deployed as the Workbench update. TASK-138 re-verified that
+tarball against a fresh `pack:dist` of the same tree before pinning it here.
+Desktop is a separate repository and is not pushed by this task; the accepted
+source is identified by commit and artifact hash, not by branch name.
+
+### Accepted-artifact provenance (read before re-verifying)
+
+`pack:dist` is **not byte-reproducible**: the generated client bundle emits its
+CSS-module class map as an object literal whose key order varies between
+builds, so two consecutive packs of the same commit produce two different
+tarballs with identical content and identical byte size (observed 2026-10-08:
+`07cf9cc1…` and `17007a2c…`, both from `8119f0c`, both differing from the
+accepted `52b75abf…` only in that key order). Therefore:
+
+- the pinned SHA256 identifies **one frozen artifact**, not a rebuild recipe;
+- a verifier must hash the frozen tarball (and the Desktop copy of it) rather
+  than re-running `pnpm pack:dist` and expecting the same digest;
+- if the Workbench is ever re-packed, the three Desktop identity copies, the
+  diagnosis-smoke default and this table must be re-pinned in the same change
+  and the Desktop `.app` rebuilt against that new tarball.
+
+Running the Workbench test suite also rewrites the tracked
+`icomposer-workbench/docs/compat-audit.json` snapshot; treat that file as a
+scratch output of `scripts/audit-compat.mjs` and restore it instead of
+committing it in a sync task.
 
 The Workbench build checkout may use its own pinned build-time Harness
 checkout (`compatibility.json` in the Workbench repository currently names
@@ -35,10 +57,10 @@ request to use a user's data directory:
 export WB_REPO=/path/to/icomposer-workbench
 export DESKTOP_REPO=/path/to/insuremo-dsh-desktop
 export WB_TGZ="$WB_REPO/dist-release/icomposer-workbench-0.1.0.tgz"
-export WB_SHA=1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5
+export WB_SHA=52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7
 
 cd "$WB_REPO"
-test "$(git rev-parse --short=7 HEAD)" = 737dbcb
+test "$(git rev-parse --short=7 HEAD)" = 8119f0c
 pnpm install --frozen-lockfile
 pnpm check
 pnpm bundle
@@ -58,6 +80,16 @@ payload and `check:git-dist` checks it. `pack:dist` then rebuilds the
 prebuilt `lib/` payload and creates the primary npm tarball. The final SHA256
 check is mandatory; do not copy an unverified tarball into Desktop.
 
+A Desktop **pin-only** sync (TASK-138) runs `pnpm check`, `pnpm bundle`,
+`pnpm typecheck`, `pnpm test` and `pnpm pack:dist` only. `pack:git-dist` /
+`check:git-dist` are deliberately skipped: they rewrite the tracked `git-dist/`
+payload, which is a separate Workbench publication artifact, and a Desktop sync
+must leave every Workbench tracked file untouched. Because a fresh `pack:dist`
+does not reproduce the pinned digest (see *Accepted-artifact provenance*), use
+it to confirm the shipped file set and content and then pin the frozen artifact
+you actually ship; never let a rebuild silently move an already-pinned
+Desktop hash.
+
 If the Workbench source checkout does not have its declared build-time Harness
 checkout, stop at `pnpm check` and obtain the exact declared build dependency.
 Do not silently substitute a public alpha or a user's installed profile. A
@@ -76,7 +108,7 @@ into `packaging/e07/runtime/manifest.json`.
 cd "$DESKTOP_REPO"
 # The following command is read-only and must print WB_SHA.
 shasum -a 256 "$WB_TGZ"
-grep -n '1e205bd8eac1b76f521bcd3430bec1e02c66f26268e1719b05856bbab2506be5' \
+grep -n '52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7' \
   compatibility.json src/main/upgrade/compatibility.ts test/support/workbench.ts
 
 # This rebuilds the ignored E07 runtime directory only; it does not install an
@@ -139,7 +171,7 @@ checked with `pnpm audit:runtime-pins`; build and execute Thin only as a
 separate, explicitly selected operator action:
 
 ```bash
-# Optional operator action; not part of the TASK-087 arm64 Full evidence.
+# Optional operator action; not part of the TASK-138 arm64 Full evidence.
 DSH_WORKBENCH_TGZ="$WB_TGZ" pnpm package:e07:thin:arm64:dir
 ```
 
@@ -151,7 +183,7 @@ Run the dedicated smoke against the newly built Full app directory:
 
 ```bash
 cd "$DESKTOP_REPO"
-DSH_DIAGNOSIS_CANARY=TASK-087-$(date +%s) \
+DSH_DIAGNOSIS_CANARY=TASK-138-$(date +%s) \
   DSH_DIAGNOSIS_APP="$APP" \
   pnpm smoke:e07:diagnosis
 ```
@@ -160,7 +192,7 @@ The script accepts the app path as its first argument as well, so the
 unambiguous form is:
 
 ```bash
-DSH_DIAGNOSIS_CANARY=TASK-087-$(date +%s) \
+DSH_DIAGNOSIS_CANARY=TASK-138-$(date +%s) \
   node scripts/run-e07-diagnosis-smoke.mjs "$APP"
 ```
 
@@ -177,13 +209,19 @@ selected and no prompt is sent.
 A successful result (`ok: true`, process exit 0) proves all of the following:
 
 - the packaged app boots stock rc.7 and exposes the Workbench card;
-- the Skills scenario reaches a failed state through exactly one fake `npx`;
+- the Skills scenario reaches a failed state through exactly two synthetic `npx`
+  invocations of the same `@insuremo/skills-tool add insuremo-skills` command
+  (a bootstrap add and the scenario-scoped `-s icomposer-full-stack` add), each
+  emitted by the fake `npx` shim and each exiting 1 — the per-invocation argv is
+  recorded in `fakeNpxTrace` so a change in that flow is visible, not silent;
 - clicking Diagnose creates/reuses the dedicated `install-diagnostics`
   Workspace under the isolated Harness home;
 - the current composer is editable and contains the canary diagnostic draft;
 - the model-selection entry is visible and enabled but is not clicked;
 - the draft remains after a delay, no prompt/completion/chat request is made,
-  and console/page exceptions are empty;
+  and console/page exceptions are empty; Electron's own DevTools/sandbox
+  bootstrap error (if the debugged page reports it) is recorded separately in
+  `consoleIgnored` and does not mask application errors;
 - the embedded tarball hash, installed `lib/client.js` hash, and served client
   hash agree with the expected Workbench SHA.
 
