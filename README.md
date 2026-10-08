@@ -30,11 +30,27 @@ hash-checked):
 
 ```bash
 DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm package:e07:arm64:dir
-DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm package:e07:arm64:mac
+DSH_WORKBENCH_TGZ=<verified-workbench.tgz> pnpm package:e07:full:arm64:mac
 APP=release/mac-arm64-Full/mac-arm64/InsureMO\ DSH\ Desktop.app
 node scripts/run-e07-packaged-smoke.mjs "$APP/Contents/MacOS/InsureMO DSH Desktop"
 pnpm smoke:e07:diagnosis "$APP"
+node scripts/record-e07-full-release.mjs
 ```
+
+The macOS arm64 **Full** release set is `release/mac-arm64-Full/`:
+the `InsureMO DSH Desktop-Full-<version>-arm64.dmg` and `.zip` plus the
+`SHA256SUMS.txt` written by `record-e07-full-release.mjs`. Blockmaps,
+`latest-mac.yml`, and any older Thin/Full package that still exists elsewhere
+under `release/` are **not** release artifacts and must not be uploaded.
+`docs/evidence/e07-full-release.json` records the filenames, byte sizes,
+SHA256 values, the source-tgz → runtime-manifest → DMG/ZIP app chain, the smoke
+results, and the signature state.
+
+These Full artifacts are **development-only**: the build is unsigned (adhoc)
+and not notarized, so a downloaded copy is blocked by Gatekeeper until the user
+explicitly allows it. A distributable release requires the CSC/notarization
+environment described below and in `docs/release-evidence-checklist.md`; do not
+present an unsigned package as a public release.
 
 `package:e07:arm64:dir` is an unsigned development directory by default;
 `signed-dir` uses the configured local signing identity and refreshes the

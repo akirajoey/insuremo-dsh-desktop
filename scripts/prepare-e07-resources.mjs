@@ -160,6 +160,38 @@ function removeBuilderIgnoredFiles(rootDir) {
   visit(rootDir)
 }
 
+/**
+ * TASK-139: the safe-mode core home overrides the non-DSH Cordis packages with
+ * the versions recorded in config/runtime-pins.json. Verify that those
+ * recorded versions really are the ones this bundled runtime installed, so a
+ * config copied from another baseline cannot silently describe different
+ * bytes than the app ships.
+ */
+function verifyFrozenCordisPins(runtimeRoot) {
+  const pins = JSON.parse(readFileSync(join(root, 'config/runtime-pins.json'), 'utf8'))
+  const cordisPattern = new RegExp(pins.nonDshCordisPattern)
+  const dshPattern = new RegExp(pins.packagePattern)
+  const expected = pins.nonDshCordis ?? {}
+  const installed = new Map()
+  for (const entry of readdirSync(join(runtimeRoot, 'harness/node_modules/.pnpm'))) {
+    const match = entry.match(/^(?<name>@[^/+]+\+[^@]+)@(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?:_|$)/u)
+    if (!match) continue
+    const name = match.groups.name.replace('+', '/')
+    if (dshPattern.test(name) || !cordisPattern.test(name)) continue
+    if (!installed.has(name)) installed.set(name, new Set())
+    installed.get(name).add(match.groups.version)
+  }
+  for (const [name, versions] of installed) {
+    if (versions.size !== 1) throw new Error(`bundled runtime has several versions of ${name}: ${[...versions].join(', ')}`)
+    const [version] = versions
+    if (expected[name] !== version) throw new Error(`bundled ${name} is ${version}, config/runtime-pins.json records ${JSON.stringify(expected[name])}`)
+  }
+  for (const name of Object.keys(expected)) {
+    if (!installed.has(name)) throw new Error(`bundled runtime is missing the frozen non-DSH Cordis package ${name}`)
+  }
+  return installed.size
+}
+
 const workbenchSha256 = sha256(workbenchPath)
 rmSync(runtimeRoot, { recursive: true, force: true })
 mkdirSync(runtimeRoot, { recursive: true })
@@ -169,6 +201,7 @@ copyFileSync(join(root, 'build/icon.png'), join(runtimeRoot, 'icon.png'))
 // mode; standalone Node binaries are intentionally not copied here.
 const pnpmEntry = preparePnpm()
 prepareHarness(pnpmEntry)
+const frozenCordisPackages = verifyFrozenCordisPins(runtimeRoot)
 removePackagingNoise(runtimeRoot)
 removeBuilderIgnoredFiles(runtimeRoot)
 mkdirSync(join(runtimeRoot, 'workbench'), { recursive: true })
@@ -187,4 +220,4 @@ const manifest = {
   workbench: { path: 'workbench/icomposer-workbench.tgz', sha256: workbenchSha256 },
 }
 writeFileSync(join(runtimeRoot, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
-console.log(JSON.stringify({ runtimeRoot, targetArch, nodeMode: 'electron-run-as-node', pnpmEntry: relative(root, pnpmEntry), fileCount: files.length, workbenchSha256 }, null, 2))
+console.log(JSON.stringify({ runtimeRoot, targetArch, nodeMode: 'electron-run-as-node', pnpmEntry: relative(root, pnpmEntry), fileCount: files.length, frozenCordisPackages, workbenchSha256 }, null, 2))

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { spawn, execFileSync } from 'node:child_process'
+import { spawn, execFileSync, spawnSync } from 'node:child_process'
 import { closeSync, existsSync, lstatSync, mkdirSync, mkdtempSync, openSync, readFileSync, readlinkSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { networkInterfaces, tmpdir } from 'node:os'
 import { basename, join, relative, resolve } from 'node:path'
@@ -15,6 +15,7 @@ const autoQuitMs = process.env.DSH_TEST_AUTO_QUIT_AFTER_MS ?? '120000'
 const normalPort = 9241
 const safePort = 9242
 const beforeHomeDsh = snapshotTree(join(process.env.HOME ?? '', '.dsh'))
+const killedLingeringInstalls = []
 
 if (!existsSync(appPath)) throw new Error(`packaged app missing: ${appPath}`)
 if (!existsSync(pluginTgz)) throw new Error(`test plugin tgz missing: ${pluginTgz}`)
@@ -81,15 +82,32 @@ async function settingsProbe(target) {
   return JSON.parse(value)
 }
 
-async function waitSettings(target) {
+async function waitSettings(target, expectedImoVersion) {
   return waitFor(async () => {
     try {
       const value = await settingsProbe(target)
-      return value.httpStatus === 200 && value.imo.available && value.imo.current === '0.2.20' && value.skills.installed > 0 ? value : undefined
+      return value.httpStatus === 200 && value.imo.available && value.imo.current === expectedImoVersion && value.skills.installed > 0 ? value : undefined
     } catch {
       return undefined
     }
   }, 60_000, 'Settings IMO/Skills overview')
+}
+
+/**
+ * Measure the IMO CLI the packaged app will actually use on this host. The
+ * overview projection must equal that measured version; there is no hardcoded
+ * version and no `>=` relaxation, so a mismatching or missing host CLI fails
+ * this gate instead of being silently accepted.
+ */
+function measureImoCliVersion() {
+  const probe = spawnSync('imo', ['--version'], { encoding: 'utf8' })
+  if (probe.error !== undefined || probe.status !== 0) {
+    throw new Error(`host 'imo --version' failed: ${probe.error?.message ?? (probe.stderr ?? '').trim() ?? `exit ${probe.status}`}`)
+  }
+  const raw = (probe.stdout ?? '').trim()
+  const version = raw.match(/(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)/u)?.[1]
+  if (version === undefined) throw new Error(`cannot read an IMO CLI version from 'imo --version': ${JSON.stringify(raw)}`)
+  return { version, raw, executable: probe.spawnfile }
 }
 
 async function waitBrand(target, label) {
@@ -159,6 +177,44 @@ function processSnapshot() {
   }
 }
 
+/**
+ * List safe-home install children this packaged app left behind. Only the
+ * app's own `pnpm add @deepseek-ai/dsh-base` process is matched, so no
+ * unrelated process is ever signalled or reported.
+ */
+function listLingeringInstalls() {
+  const found = []
+  let lines = []
+  try {
+    lines = execFileSync('ps', ['-axo', 'pid=,command='], { encoding: 'utf8' }).split('\n')
+  } catch {
+    return found
+  }
+  for (const line of lines) {
+    const match = line.trim().match(/^(\d+)\s+(.*)$/u)
+    if (match === null) continue
+    const [, pid, command] = match
+    if (!command.includes(appPath)) continue
+    if (!command.includes('pnpm.cjs add --save-exact @deepseek-ai/dsh-base@')) continue
+    found.push({ pid: Number(pid), command })
+  }
+  return found
+}
+
+function killLingeringInstalls() {
+  const killed = []
+  for (const leftover of listLingeringInstalls()) {
+    try {
+      process.kill(leftover.pid, 'SIGKILL')
+      killed.push(leftover.pid)
+      killedLingeringInstalls.push(leftover.pid)
+    } catch {
+      // Already exited between the snapshot and the kill.
+    }
+  }
+  return killed
+}
+
 async function launch(mode, port, userData, openPluginManager) {
   const logPath = join('/tmp', `e07-packaged-${mode}.log`)
   mkdirSync('/tmp', { recursive: true })
@@ -196,7 +252,7 @@ async function normalPhase() {
     const harness = await waitTarget(normalPort, target => target.type === 'page' && target.url.startsWith('http://127.0.0.1:'), 'normal harness')
     const plugin = await waitTarget(normalPort, target => target.type === 'page' && target.url.includes('/plugin-manager/index.html'), 'plugin manager')
     const brand = await waitBrand(harness, 'normal brand')
-    const settings = await waitSettings(harness)
+    const settings = await waitSettings(harness, imoCliVersion)
     const installed = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.installCapability('tgz:packaged-smoke')))()`))
     if (!installed.ok) throw new Error(`packaged tgz install failed: ${JSON.stringify(installed)}`)
     const listed = JSON.parse(await evaluate(plugin, `(async()=>JSON.stringify(await window.insuremoPlugins.list()))()`))
@@ -241,18 +297,70 @@ async function safePhase() {
     return { mode: 'safe', page, manifest: { normalWorkbench: true, safeWorkbench: false }, exit: closed, logPath: '<temp>/e07-packaged-safe.log' }
   } finally {
     await stopIfAlive(phase.child)
+    killLingeringInstalls()
+  }
+}
+
+/**
+ * TASK-139 repair phase: a safe home whose recorded graph is stale must be
+ * re-installed from the frozen pins on the next safe boot instead of being
+ * silently reused. The phase plants the pre-fix marker (hmr 1.0.19), boots
+ * safe again, and requires a clean boot plus a marker rewritten with the
+ * frozen pin - the repair path from the release blocker.
+ */
+async function safeRepairPhase() {
+  const pins = JSON.parse(readFileSync(join(root, 'config/runtime-pins.json'), 'utf8'))
+  const frozenHmr = pins.nonDshCordis['@deepseek-ai/cordis-plugin-hmr']
+  const graphPath = join(testUserData, 'safe-runtime/harness/profiles/web/safe-graph.json')
+  const lockPath = join(testUserData, 'safe-runtime/harness/profiles/web/pnpm-lock.yaml')
+  if (!existsSync(graphPath)) throw new Error('safe repair phase needs a previously installed safe home')
+  const recorded = JSON.parse(readFileSync(graphPath, 'utf8'))
+  writeFileSync(graphPath, JSON.stringify({
+    ...recorded,
+    overrides: { ...recorded.overrides, '@deepseek-ai/cordis-plugin-hmr': '1.0.19' },
+  }, null, 2) + '\n')
+  const phase = await launch('safe', safePort, testUserData, false)
+  try {
+    const harness = await waitTarget(safePort, target => target.type === 'page' && target.url.startsWith('http://127.0.0.1:'), 'repaired safe harness')
+    const page = await waitFor(async () => {
+      try {
+        const value = JSON.parse(await evaluate(harness, 'JSON.stringify({ title: document.title, body: document.body.innerText.slice(0, 300) })'))
+        return value.body.length < 20 || value.body.includes('Loading plugins') ? undefined : value
+      } catch {
+        return undefined
+      }
+    }, 30_000, 'repaired safe page')
+    const closed = await phase.closed
+    if (closed.code !== 0) throw new Error(`repaired safe app exit: ${JSON.stringify(closed)}`)
+    const rewritten = JSON.parse(readFileSync(graphPath, 'utf8'))
+    if (rewritten.overrides?.['@deepseek-ai/cordis-plugin-hmr'] !== frozenHmr) throw new Error(`stale safe graph marker was not refreshed with the frozen pin: ${JSON.stringify(rewritten.overrides?.['@deepseek-ai/cordis-plugin-hmr'])}`)
+    const lock = readFileSync(lockPath, 'utf8')
+    if (!lock.includes(`'@deepseek-ai/cordis-plugin-hmr@${frozenHmr}'`)) throw new Error(`safe home lockfile does not pin cordis-plugin-hmr ${frozenHmr}`)
+    return { mode: 'safe-repair', page, staleMarkerRefreshed: true, frozenHmr, exit: closed, logPath: '<temp>/e07-packaged-safe.log' }
+  } finally {
+    await stopIfAlive(phase.child)
+    killLingeringInstalls()
   }
 }
 
 const result = { ok: false, arch: process.arch, app: basename(appPath), beforeHomeDsh: beforeHomeDsh === null ? 'absent' : 'present' }
+let imoCliVersion
+// The host CLI version is measured, never assumed: the Settings IMO/Skills gate
+// compares the packaged overview projection against this exact value.
 try {
+  result.imoCli = measureImoCliVersion()
+  imoCliVersion = result.imoCli.version
   result.normal = await normalPhase()
   result.safe = await safePhase()
+  result.safeRepair = await safeRepairPhase()
   const afterHomeDsh = snapshotTree(join(process.env.HOME ?? '', '.dsh'))
   result.homeDshUnchanged = JSON.stringify(beforeHomeDsh) === JSON.stringify(afterHomeDsh)
   if (!result.homeDshUnchanged) throw new Error('packaged smoke modified ~/.dsh')
   result.orphanWrappers = processSnapshot()
   if (result.orphanWrappers.length > 0) throw new Error(`orphan runtime wrappers: ${JSON.stringify(result.orphanWrappers)}`)
+  result.killedLingeringInstalls = killedLingeringInstalls
+  const survivors = listLingeringInstalls()
+  if (survivors.length > 0) throw new Error(`lingering safe-home install processes: ${JSON.stringify(survivors)}`)
   result.ok = true
 } catch (error) {
   result.error = error instanceof Error ? error.message : String(error)

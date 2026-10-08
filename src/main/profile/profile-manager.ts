@@ -3,6 +3,7 @@ import { join, dirname, basename } from 'node:path'
 import { createHash } from 'node:crypto'
 import { openSync, closeSync, fsyncSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { renderSafeWorkspaceYaml, type SafeRuntimePins } from './safe-runtime-graph.ts'
 
 const require2 = createRequire(import.meta.url)
 
@@ -353,7 +354,7 @@ export class ProfileManager {
   }
 
   /** Initialize the safe (core-only) home from the web template. */
-  materializeSafeHome(runtimePins?: { version: string; packages: readonly string[] }): string {
+  materializeSafeHome(runtimePins?: SafeRuntimePins): string {
     const safeHome = join(this.userData, SAFE_HOME)
     const safeProfile = join(safeHome, PROFILE_DIR)
     ProfileManager.ensureDir(safeProfile)
@@ -364,9 +365,9 @@ export class ProfileManager {
       dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'] } },
     }, null, 2) + '\n')
     writeFileSync(join(safeProfile, 'cordis.patch.yml'), '# safe profile patch layer\n[]\n')
-    const pins = runtimePins ?? { version: '0.1.0-rc.7', packages: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'] }
-    const overrides = pins.packages.map(name => `  '${name}': ${pins.version}`).join('\n')
-    writeFileSync(join(safeProfile, 'pnpm-workspace.yaml'), `packages:\n  - .\n\nnodeLinker: hoisted\nautoInstallPeers: false\nallowBuilds:\n  '@deepseek-ai/dsh-subprocess-local': true\n  '@google/genai': true\n  electron: true\n  esbuild: true\n  koffi: true\n  node-pty: true\n  protobufjs: true\noverrides:\n${overrides}\n`)
+    // Overrides freeze the DSH pins and the non-DSH Cordis versions to the same
+    // exact baseline the bundled Full runtime ships (TASK-139).
+    writeFileSync(join(safeProfile, 'pnpm-workspace.yaml'), renderSafeWorkspaceYaml(runtimePins))
     return safeHome
   }
 }

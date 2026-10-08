@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "task": "TASK-139",
+  "platform": "darwin",
+  "arch": "arm64",
+  "version": "0.1.0",
+  "distribution": "development-only",
+  "artifacts": [
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
+      "size": 169054093,
+      "sha256": "45a52a401c333fe3c461a9245831861c4699d8260464f14914765b0a01247a98"
+    },
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
+      "size": 176160047,
+      "sha256": "8902e1425d46273e916dac4245d0855219256335e78c67b28b8e382553e49a9c"
+    }
+  ],
+  "sha256sums": {
+    "path": "release/mac-arm64-Full/SHA256SUMS.txt",
+    "size": 216,
+    "sha256": "45821ace29fcd7674360272d7fbca7bb3c571a9d7cc85f8c02b10c6fa4807d2d"
+  },
+  "companions": [
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
+      "size": 178768,
+      "sha256": "28daebc07c0e7a1f055eb6597b39b9cf6502b9d6a43208cbc7c8a6aac5bbf8a8"
+    },
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
+      "size": 180625,
+      "sha256": "aba8a73d3c5aa7f6dd9730c65842668b08d451de0a4844c6a030294aa3ade608"
+    },
+    {
+      "path": "release/mac-arm64-Full/builder-debug.yml",
+      "size": 1102,
+      "sha256": "20aa661a4522ee79e7a1ebd220502e9ac2f5e76b21909f6f97b30b197d418fa0"
+    },
+    {
+      "path": "release/mac-arm64-Full/latest-mac.yml",
+      "size": 551,
+      "sha256": "b4e88a53d908d51440d0ee7cfe5584d44bafe4af6da46fbdddf814e6cc6862d7"
+    }
+  ],
+  "excluded": [
+    {
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
+      "size": 179080,
+      "sha256": "701d597c92124365c8d3e562ca5eb4a5a81bec44139ebb7c0f2abe84f346f89c",
+      "reason": "not produced by this build (older Full/Thin package or metadata)"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
+      "size": 183159,
+      "sha256": "1e0ac4113680988716c0562a8f958a3bb7371ca9122e499c40301532571dfd8e",
+      "reason": "not produced by this build (older Full/Thin package or metadata)"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.dmg.blockmap",
+      "size": 120399,
+      "sha256": "2bb83d79a4ff53b3b3b370ab4ab7d9c0e1cab0f614e2147e3f302937ef886446",
+      "reason": "not produced by this build (older Full/Thin package or metadata)"
+    },
+    {
+      "path": "release/InsureMO DSH Desktop-Thin-0.1.0-arm64.zip.blockmap",
+      "size": 114939,
+      "sha256": "2d4c7fac1adfc5a328b9033af7ebd476c206c58081430476747a4883d6647308",
+      "reason": "not produced by this build (older Full/Thin package or metadata)"
+    }
+  ],
+  "packagedApp": {
+    "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app",
+    "binary": {
+      "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app/Contents/MacOS/InsureMO DSH Desktop",
+      "size": 33968,
+      "sha256": "1af684f056a8eb13e49fbd677072e437316086b076e3b9b92de3ddb343edc5b1"
+    },
+    "runtimeManifest": {
+      "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app/Contents/Resources/dsh-runtime/manifest.json",
+      "size": 8216949,
+      "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286"
+    },
+    "bundledWorkbenchTgz": {
+      "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app/Contents/Resources/dsh-runtime/workbench/icomposer-workbench.tgz",
+      "size": 354849,
+      "sha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7"
+    },
+    "packagedCompatibility": {
+      "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app/Contents/Resources/app/compatibility.json",
+      "size": 655,
+      "sha256": "4953c873f44ddf95bc591ad10b21f74d1361d292c9a410f58d1bb89223799457"
+    },
+    "runtime": {
+      "version": "0.1.0-rc.7",
+      "nodeVersion": "24.18.1",
+      "arch": "arm64",
+      "nodeMode": "electron-run-as-node"
+    },
+    "signature": {
+      "verifyExit": 1,
+      "valid": false,
+      "signature": "adhoc",
+      "identifier": "Electron",
+      "teamIdentifier": "not set",
+      "authority": null,
+      "notarized": false,
+      "distribution": "development-only: unsigned (adhoc) build, gatekeeper will block a plain download until the user explicitly allows it"
+    }
+  },
+  "chain": {
+    "sourceWorkbenchTgz": {
+      "path": "../icomposer-workbench/dist-release/icomposer-workbench-0.1.0.tgz",
+      "size": 354849,
+      "sha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7"
+    },
+    "bundledWorkbenchSha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7",
+    "compatibilityWorkbenchSha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7",
+    "runtimeManifestWorkbenchSha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7"
+  },
+  "expandedApp": {
+    "dmg": {
+      "runtimeManifest": {
+        "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286",
+        "size": 8216949
+      },
+      "bundledWorkbenchTgz": {
+        "sha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7",
+        "size": 354849
+      },
+      "packagedCompatibility": {
+        "sha256": "4953c873f44ddf95bc591ad10b21f74d1361d292c9a410f58d1bb89223799457",
+        "size": 655
+      },
+      "binary": {
+        "sha256": "1af684f056a8eb13e49fbd677072e437316086b076e3b9b92de3ddb343edc5b1",
+        "size": 33968
+      }
+    },
+    "zip": {
+      "runtimeManifest": {
+        "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286",
+        "size": 8216949
+      },
+      "bundledWorkbenchTgz": {
+        "sha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7",
+        "size": 354849
+      },
+      "packagedCompatibility": {
+        "sha256": "4953c873f44ddf95bc591ad10b21f74d1361d292c9a410f58d1bb89223799457",
+        "size": 655
+      },
+      "binary": {
+        "sha256": "1af684f056a8eb13e49fbd677072e437316086b076e3b9b92de3ddb343edc5b1",
+        "size": 33968
+      }
+    },
+    "buildDir": {
+      "runtimeManifest": {
+        "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286",
+        "size": 8216949
+      },
+      "bundledWorkbenchTgz": {
+        "sha256": "52b75abfb6fcfe6d1a42c1618fc6307b3a190ea51ea58ac4d17dabc7250776c7",
+        "size": 354849
+      },
+      "packagedCompatibility": {
+        "sha256": "4953c873f44ddf95bc591ad10b21f74d1361d292c9a410f58d1bb89223799457",
+        "size": 655
+      },
+      "binary": {
+        "sha256": "1af684f056a8eb13e49fbd677072e437316086b076e3b9b92de3ddb343edc5b1",
+        "size": 33968
+      }
+    },
+    "matches": true
+  },
+  "smokes": {
+    "packaged": {
+      "source": "/tmp/task139/packaged-smoke.json",
+      "ok": true,
+      "normalExit": 0,
+      "settings": {
+        "httpStatus": 200,
+        "imo": {
+          "available": true,
+          "current": "0.2.25"
+        },
+        "skills": {
+          "installed": 19
+        }
+      },
+      "plugin": {
+        "install": true,
+        "remove": true,
+        "gone": true
+      },
+      "safeExit": 0,
+      "safeRepair": {
+        "exit": 0,
+        "frozenHmr": "1.0.16"
+      },
+      "imoCli": {
+        "version": "0.2.25",
+        "raw": "0.2.25"
+      },
+      "homeDshUnchanged": true,
+      "orphanWrappers": [],
+      "killedLingeringInstalls": []
+    },
+    "diagnosis": {
+      "source": "/tmp/task139/diagnosis.json",
+      "ok": true,
+      "fakeNpxRuns": 2,
+      "errors": []
+    }
+  },
+  "buildLog": {
+    "path": "../../../../tmp/task139/build-full-mac.log",
+    "sha256": "0cc191e67007f4d82777ae277e80039883fa89cc829a03d398d4f8418c754326"
+  },
+  "commands": [
+    "DSH_WORKBENCH_TGZ=<icomposer-workbench>/dist-release/icomposer-workbench-0.1.0.tgz pnpm package:e07:full:arm64:mac",
+    "node scripts/run-e07-packaged-smoke.mjs \"<app binary>\"",
+    "node scripts/scan-e07-artifacts.mjs release/mac-arm64-Full"
+  ],
+  "residuals": [
+    "The DMG/ZIP are unsigned (adhoc) and not notarized; a downloaded copy is blocked by Gatekeeper until the user allows it.",
+    "macOS x64 and Windows artifacts are not built or verified by this task.",
+    "Only the DMG and ZIP are release artifacts: blockmaps, latest-mac.yml, and older Thin/Full packages are excluded."
+  ]
+}

@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { RuntimeController } from '../runtime/controller.ts'
 import type { RuntimeSnapshot } from '../runtime/contracts.ts'
@@ -9,6 +9,7 @@ import { ProfileManager } from '../profile/profile-manager.ts'
 import { appendHarnessLog, harnessLogPath } from './logs.ts'
 import { appRoot } from './app-root.ts'
 import { captureDesktopEnvironment } from './windows-environment.ts'
+import { SAFE_GRAPH_FILE, safeGraphDescriptor, safeGraphStale, type SafeRuntimePins } from '../profile/safe-runtime-graph.ts'
 
 /** Resolve the wrapper from source in dev or the hashed Vite asset in out/. */
 export function resolveWrapperPath(runtimeRoot?: string): string {
@@ -167,16 +168,24 @@ export class HarnessManager {
    * Materialize (once) and install the safe home profile: base+web-app from
    * the pinned runtime graph, no home patch layer, no workbench, no
    * third-party plugins. The normal home is never modified.
+   *
+   * The install is re-run when the safe home was built from a different graph
+   * than the frozen bundled baseline (TASK-139): a safe home carrying the
+   * pre-fix floating Cordis graph is repaired instead of silently reused.
    */
   private async prepareSafeHome(environment: Record<string, string>): Promise<string> {
-    const safeHome = this.options.profileManager.materializeSafeHome({
+    const pins: SafeRuntimePins = {
       version: this.options.runtimePin,
       packages: readRuntimePackages(appRoot()),
-    })
+      nonDshCordis: readRuntimeCordisPins(appRoot()),
+    }
+    const safeHome = this.options.profileManager.materializeSafeHome(pins)
     this.safeHome = safeHome
     const profileDir = join(safeHome, 'profiles/web')
     const marker = join(profileDir, 'node_modules', '@deepseek-ai', 'dsh-web-app', 'package.json')
-    if (!existsSync(marker)) {
+    const graphPath = join(profileDir, SAFE_GRAPH_FILE)
+    const expectedGraph = safeGraphDescriptor(pins)
+    if (!existsSync(marker) || safeGraphStale(readJson(graphPath), expectedGraph)) {
       const pin = this.options.runtimePin
       const result = await PnpmLauncher.run({
         nodePath: this.options.nodePath,
@@ -189,6 +198,7 @@ export class HarnessManager {
       if (result.exitCode !== 0) throw new Error(`safe home install failed: ${result.stderr.slice(-600)}`)
       this.options.profileManager.healStagingPeerFarm(profileDir)
       BundleReconciler.reconcile(profileDir)
+      writeFileSync(graphPath, JSON.stringify(expectedGraph, null, 2) + '\n')
     }
     return safeHome
   }
@@ -212,5 +222,29 @@ export function readRuntimePackages(repoRoot: string): string[] {
     return config.packages ?? ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app']
   } catch {
     return ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app']
+  }
+}
+
+/**
+ * Read the frozen non-DSH Cordis versions the safe home must resolve to.
+ * Empty when the config is unavailable; the install then keeps the pinned DSH
+ * graph only, which is the pre-TASK-139 behavior.
+ */
+export function readRuntimeCordisPins(repoRoot: string): Record<string, string> {
+  const configPath = join(repoRoot, 'config/runtime-pins.json')
+  try {
+    const config = JSON.parse(readFileSync(configPath, 'utf8')) as { nonDshCordis?: Record<string, string> }
+    return config.nonDshCordis ?? {}
+  } catch {
+    return {}
+  }
+}
+
+/** Read a small JSON document, treating any malformed content as absent. */
+function readJson(path: string): unknown {
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return undefined
   }
 }

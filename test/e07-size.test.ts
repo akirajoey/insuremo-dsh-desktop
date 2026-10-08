@@ -37,7 +37,11 @@ describe('E07 target size and packaged settings contracts', () => {
   it('keeps Settings smoke read-only and limited to IMO/version/Skills projections', () => {
     const smoke = text('scripts/run-e07-packaged-smoke.mjs')
     expect(smoke).toContain('/api/icomposer-workbench/insuremo/overview?fast=0')
-    expect(smoke).toContain("value.imo.current === '0.2.20'")
+    // TASK-139: the expected IMO version is measured from the host CLI, not
+    // hardcoded and not relaxed with a range comparison.
+    expect(smoke).toContain('measureImoCliVersion')
+    expect(smoke).toContain('value.imo.current === expectedImoVersion')
+    expect(smoke).not.toContain('0.2.20')
     expect(smoke).toContain('value.skills.installed > 0')
     expect(smoke).not.toContain('access_token')
     expect(smoke).not.toContain('auth.profile')

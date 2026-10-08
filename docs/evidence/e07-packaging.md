@@ -153,3 +153,38 @@ safe phases exited 0, Workbench/IMO/skills and plugin install/remove passed,
 LAN remained refused, `homeDshUnchanged` was true, and wrapper orphans were
 zero. Process observation showed every GPU/utility/renderer helper using the
 temporary `--user-data-dir`; no real production userData path was present.
+
+## TASK-139 update (2026-10-08): safe-mode runtime graph and unsigned Full release
+
+The sections above describe the earlier E02-era layout (standalone Darwin Node
+archives). Since then the arm64 Full runtime uses Electron `43.4.0`
+`electron-run-as-node` with embedded Node `24.18.1` and prepares no standalone
+Node, so the current resource manifest holds **27,697** entries.
+
+Safe-mode release blocker (reproduced on the TASK-138 build): the safe
+core-only home installed `@deepseek-ai/dsh-base`/`dsh-web-app@0.1.0-rc.7` from
+the registry and let the non-DSH Cordis ranges float, so
+`@deepseek-ai/cordis-plugin-hmr` resolved to `1.0.19` (whose
+`hmr.registerConfig` is gone) and `@deepseek-ai/dsh-app-boot@0.1.0-rc.7`
+aborted the boot with `TypeError: hmr.registerConfig is not a function`.
+`config/runtime-pins.json` now freezes those six packages in its `nonDshCordis`
+map (enforced against `pnpm-lock.yaml` by `pnpm audit:runtime-pins` and against
+the installed runtime by `scripts/prepare-e07-resources.mjs`), the safe profile
+renders them as pnpm overrides, and a safe home recorded with a different graph
+is re-installed instead of reused.
+
+Full arm64 release build and evidence:
+
+```text
+DSH_WORKBENCH_TGZ=<frozen-workbench.tgz> pnpm package:e07:full:arm64:mac
+node scripts/record-e07-full-release.mjs
+```
+
+`docs/evidence/e07-full-release.json` is the receipt: DMG/ZIP sizes and
+SHA256 values, `SHA256SUMS.txt`, the source-tgz → runtime-manifest → DMG/ZIP app
+identity chain, the packaged/diagnosis smoke summaries, and the signature
+state. The two artifacts are **unsigned (adhoc) and not notarized**
+(`codesign --verify --deep --strict` exits 1, `TeamIdentifier` is not set), so
+they are development-only until Developer ID signing and notarization run.
+Blockmaps, `latest-mac.yml`, and older Thin/Full packages still present under
+`release/` are recorded as excluded and must not be uploaded.

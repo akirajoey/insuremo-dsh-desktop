@@ -55,3 +55,22 @@ seam), and pass native macOS/Windows verification. Apple Developer ID,
 notarization, Windows Authenticode, and update-feed credentials are not stored
 in source or CI logs. Do not publish a receipt with pending signatures or
 unverified native x64 evidence.
+
+## TASK-139 macOS arm64 Full package (development-only)
+
+`docs/evidence/e07-full-release.json` records the arm64 Full DMG/ZIP produced
+by `package:e07:full:arm64:mac` for TASK-139. Its `distribution` is
+`development-only` and the receipt is explicit about why: the app is unsigned
+(adhoc signature, no `TeamIdentifier`) and not notarized, so Gatekeeper blocks
+a plain download until the user allows it. The checklist above still governs a
+distributable receipt, and the release form (source branch push versus a
+GitHub Release carrying these files) is a user decision that this receipt does
+not make.
+
+The recorded release set is exactly the arm64 Full DMG, ZIP, and
+`SHA256SUMS.txt`. Blockmaps, `latest-mac.yml`, and any older Thin/Full package
+under `release/` are listed as excluded; `expandedApp` proves the app inside
+the DMG and inside the ZIP matches the built app byte for byte. macOS x64 and
+Windows were not built or verified, and the safe-mode core home resolves the
+frozen non-DSH Cordis pins from `config/runtime-pins.json` instead of floating
+to newer registry releases.

@@ -45,6 +45,31 @@ for (const name of lockVersions.keys()) {
 }
 
 const overrides = workspace.overrides ?? {}
+
+// TASK-139: the frozen non-DSH Cordis versions are the ones the bundled Full
+// runtime installs. They must be recorded in the pins so the safe core-only
+// home can override them instead of floating to newer registry releases.
+const frozenCordis = new Map()
+for (const key of Object.keys(lock.packages ?? {})) {
+  const { name, version } = packageFromKey(key)
+  if (!name || !version) continue
+  if (dshPattern.test(name) || !cordisPattern.test(name)) continue
+  const known = frozenCordis.get(name)
+  if (known !== undefined && known !== version) addError(`lockfile has multiple non-DSH Cordis versions for ${name}: ${known}, ${version}`)
+  frozenCordis.set(name, version)
+}
+const cordisPins = pins.nonDshCordis
+if (cordisPins === null || typeof cordisPins !== 'object' || Array.isArray(cordisPins)) {
+  addError('runtime pins are missing the frozen nonDshCordis map')
+} else {
+  for (const [name, version] of frozenCordis) {
+    if (cordisPins[name] !== version) addError(`nonDshCordis ${name} is ${JSON.stringify(cordisPins[name])}, lockfile has ${version}`)
+  }
+  for (const name of Object.keys(cordisPins)) {
+    if (frozenCordis.has(name)) continue
+    addError(cordisPattern.test(name) ? `nonDshCordis ${name} is not in the lockfile` : `nonDshCordis entry ${name} does not match nonDshCordisPattern`)
+  }
+}
 for (const name of expected) {
   if (overrides[name] !== pins.version) addError(`override ${name} is ${JSON.stringify(overrides[name])}`)
 }
@@ -117,5 +142,5 @@ if (errors.length > 0) {
   console.error(`Runtime pin audit: FAIL\n${errors.join('\n')}`)
   process.exitCode = 1
 } else {
-  console.log(`Runtime pin audit: PASS (${expected.size} DSH packages at ${pins.version}; ${installed.size} installed entries)`)
+  console.log(`Runtime pin audit: PASS (${expected.size} DSH packages at ${pins.version}; ${installed.size} installed entries; ${frozenCordis.size} frozen non-DSH Cordis pins)`)
 }
