@@ -127,6 +127,7 @@ describe('TASK-139 safe-home repair and provenance (risk: high - silent stale gr
   it('records a development-only release set with the excluded files named', () => {
     const evidence = JSON.parse(text('docs/evidence/e07-full-release.json')) as {
       distribution: string
+      version: string
       artifacts: { path: string; size: number; sha256: string }[]
       excluded: { path: string; reason: string }[]
       packagedApp: { signature: { valid: boolean; signature: string | null; teamIdentifier: string | null } }
@@ -134,9 +135,12 @@ describe('TASK-139 safe-home repair and provenance (risk: high - silent stale gr
       expandedApp: { matches: boolean }
     }
     expect(evidence.distribution).toBe('development-only')
+    // The artifact names follow the single version source in package.json.
+    const version = (JSON.parse(text('package.json')) as { version: string }).version
+    expect(evidence.version).toBe(version)
     expect(evidence.artifacts.map(artifact => artifact.path.split('/').at(-1))).toEqual([
-      'InsureMO DSH Desktop-Full-0.1.0-arm64.dmg',
-      'InsureMO DSH Desktop-Full-0.1.0-arm64.zip',
+      `InsureMO DSH Desktop-Full-${version}-arm64.dmg`,
+      `InsureMO DSH Desktop-Full-${version}-arm64.zip`,
     ])
     for (const artifact of evidence.artifacts) {
       expect(artifact.size).toBeGreaterThan(0)

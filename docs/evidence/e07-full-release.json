@@ -1,47 +1,75 @@
 {
   "schemaVersion": 1,
-  "task": "TASK-139",
+  "task": "TASK-140",
   "platform": "darwin",
   "arch": "arm64",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "distribution": "development-only",
   "artifacts": [
     {
-      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
-      "size": 169054093,
-      "sha256": "45a52a401c333fe3c461a9245831861c4699d8260464f14914765b0a01247a98"
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.1-arm64.dmg",
+      "size": 168995422,
+      "sha256": "7abfa0b514e410fcc217eb5fde783b95a360438a962efac9a0904bf672f55ffb"
     },
     {
-      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
-      "size": 176160047,
-      "sha256": "8902e1425d46273e916dac4245d0855219256335e78c67b28b8e382553e49a9c"
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.1-arm64.zip",
+      "size": 176159853,
+      "sha256": "145f81ee01ec57da26436a4fc4e876a774ad36b2356bc2d153c3554709e127d5"
     }
   ],
   "sha256sums": {
     "path": "release/mac-arm64-Full/SHA256SUMS.txt",
     "size": 216,
-    "sha256": "45821ace29fcd7674360272d7fbca7bb3c571a9d7cc85f8c02b10c6fa4807d2d"
+    "sha256": "0baa83f3f9e9a510e18462e2a9359975efdfae2879de52a1f4eb152d4947fe61"
   },
   "companions": [
     {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg",
+      "size": 169054093,
+      "sha256": "45a52a401c333fe3c461a9245831861c4699d8260464f14914765b0a01247a98",
+      "reason": "not a release artifact of this build"
+    },
+    {
       "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.dmg.blockmap",
       "size": 178768,
-      "sha256": "28daebc07c0e7a1f055eb6597b39b9cf6502b9d6a43208cbc7c8a6aac5bbf8a8"
+      "sha256": "28daebc07c0e7a1f055eb6597b39b9cf6502b9d6a43208cbc7c8a6aac5bbf8a8",
+      "reason": "not a release artifact of this build"
+    },
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip",
+      "size": 176160047,
+      "sha256": "8902e1425d46273e916dac4245d0855219256335e78c67b28b8e382553e49a9c",
+      "reason": "not a release artifact of this build"
     },
     {
       "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.0-arm64.zip.blockmap",
       "size": 180625,
-      "sha256": "aba8a73d3c5aa7f6dd9730c65842668b08d451de0a4844c6a030294aa3ade608"
+      "sha256": "aba8a73d3c5aa7f6dd9730c65842668b08d451de0a4844c6a030294aa3ade608",
+      "reason": "not a release artifact of this build"
+    },
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.1-arm64.dmg.blockmap",
+      "size": 176265,
+      "sha256": "5e2ea94a5df5bad73605c026a0ece562cde55178ed119040ec7e2659498f0c51",
+      "reason": "not a release artifact of this build"
+    },
+    {
+      "path": "release/mac-arm64-Full/InsureMO DSH Desktop-Full-0.1.1-arm64.zip.blockmap",
+      "size": 180453,
+      "sha256": "3124d9cd83e9210431b343e8d7d5223e15cc7251822e3180071b644ca0db1670",
+      "reason": "not a release artifact of this build"
     },
     {
       "path": "release/mac-arm64-Full/builder-debug.yml",
       "size": 1102,
-      "sha256": "20aa661a4522ee79e7a1ebd220502e9ac2f5e76b21909f6f97b30b197d418fa0"
+      "sha256": "20aa661a4522ee79e7a1ebd220502e9ac2f5e76b21909f6f97b30b197d418fa0",
+      "reason": "not a release artifact of this build"
     },
     {
       "path": "release/mac-arm64-Full/latest-mac.yml",
       "size": 551,
-      "sha256": "b4e88a53d908d51440d0ee7cfe5584d44bafe4af6da46fbdddf814e6cc6862d7"
+      "sha256": "d97a76bb3d55abd83ae2a8eea6cbf006f8944372745ce60e420fdb91734e25ff",
+      "reason": "not a release artifact of this build"
     }
   ],
   "excluded": [
@@ -80,7 +108,7 @@
     "runtimeManifest": {
       "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app/Contents/Resources/dsh-runtime/manifest.json",
       "size": 8216949,
-      "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286"
+      "sha256": "0ec5d348dc10fbdb34cc585c6cf4b99c5afb4655686101c626f6c9c816169173"
     },
     "bundledWorkbenchTgz": {
       "path": "release/mac-arm64-Full/mac-arm64/InsureMO DSH Desktop.app/Contents/Resources/dsh-runtime/workbench/icomposer-workbench.tgz",
@@ -122,7 +150,7 @@
   "expandedApp": {
     "dmg": {
       "runtimeManifest": {
-        "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286",
+        "sha256": "0ec5d348dc10fbdb34cc585c6cf4b99c5afb4655686101c626f6c9c816169173",
         "size": 8216949
       },
       "bundledWorkbenchTgz": {
@@ -140,7 +168,7 @@
     },
     "zip": {
       "runtimeManifest": {
-        "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286",
+        "sha256": "0ec5d348dc10fbdb34cc585c6cf4b99c5afb4655686101c626f6c9c816169173",
         "size": 8216949
       },
       "bundledWorkbenchTgz": {
@@ -158,7 +186,7 @@
     },
     "buildDir": {
       "runtimeManifest": {
-        "sha256": "d8cfe5bd9b8f5effe1a4be22022a63845f05714d2451bf046ab99051c998c286",
+        "sha256": "0ec5d348dc10fbdb34cc585c6cf4b99c5afb4655686101c626f6c9c816169173",
         "size": 8216949
       },
       "bundledWorkbenchTgz": {
@@ -178,7 +206,7 @@
   },
   "smokes": {
     "packaged": {
-      "source": "/tmp/task139/packaged-smoke.json",
+      "source": "/tmp/task140/packaged-smoke.json",
       "ok": true,
       "normalExit": 0,
       "settings": {
@@ -210,15 +238,15 @@
       "killedLingeringInstalls": []
     },
     "diagnosis": {
-      "source": "/tmp/task139/diagnosis.json",
+      "source": "/tmp/task140/diagnosis.json",
       "ok": true,
       "fakeNpxRuns": 2,
       "errors": []
     }
   },
   "buildLog": {
-    "path": "../../../../tmp/task139/build-full-mac.log",
-    "sha256": "0cc191e67007f4d82777ae277e80039883fa89cc829a03d398d4f8418c754326"
+    "path": "../../../../tmp/task140/build-full-mac.log",
+    "sha256": "811b7c92b089ba969c4a976007fc46024f2d97fe17ee9fc431970bbd3dd90c4f"
   },
   "commands": [
     "DSH_WORKBENCH_TGZ=<icomposer-workbench>/dist-release/icomposer-workbench-0.1.0.tgz pnpm package:e07:full:arm64:mac",

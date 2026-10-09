@@ -14,7 +14,8 @@
  *
  * Usage:
  *   node scripts/record-e07-full-release.mjs [--dir release/mac-arm64-Full] \
- *     [--packaged-smoke <json>] [--diagnosis-smoke <json>] [--build-log <path>]
+ *     [--task TASK-140] [--packaged-smoke <json>] [--diagnosis-smoke <json>] \
+ *     [--build-log <path>]
  */
 import { createHash } from 'node:crypto'
 import { execFileSync, spawnSync } from 'node:child_process'
@@ -48,10 +49,13 @@ for (const artifact of artifacts) {
   if (!existsSync(join(root, artifact.path))) throw new Error(`release artifact missing: ${artifact.path}`)
 }
 
-/** Everything else in the build directory is metadata or a blockmap. */
+/**
+ * Everything else in the build directory is metadata, a blockmap, or a package
+ * from an earlier version. It is recorded so nobody uploads it by filename.
+ */
 const companions = readdirSync(outputDir)
   .filter(name => !artifactNames.includes(name) && /\.(?:blockmap|yml|dmg|zip|json)$/u.test(name))
-  .map(name => record(join(outputDir, name)))
+  .map(name => ({ ...record(join(outputDir, name)), reason: 'not a release artifact of this build' }))
 
 /** Older packages elsewhere in release/ must never be uploaded for this build. */
 const excluded = []
@@ -169,7 +173,7 @@ const buildLog = argValue('--build-log')
 const expandedApp = verifyExpandedApp()
 const evidence = {
   schemaVersion: 1,
-  task: 'TASK-139',
+  task: argValue('--task') ?? 'TASK-139',
   platform: 'darwin',
   arch,
   version,
